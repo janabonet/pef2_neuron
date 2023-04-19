@@ -1,6 +1,6 @@
 # Used functions and structs 
 
-module used_functions
+module used_functions #he afegit un comentari
 
 function hodgkin_huxley_deterministic!(du,u,p,t)
 
