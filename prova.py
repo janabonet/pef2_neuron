@@ -1,0 +1,1 @@
+He escrit una mica 
