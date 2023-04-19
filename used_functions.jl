@@ -17,3 +17,5 @@ function hodgkin_huxley_deterministic!(du,u,p,t)
 
     nothing
 end
+
+end
