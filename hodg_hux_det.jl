@@ -24,7 +24,8 @@ function HH!(du,u,p,t);
     du[4] = (αh(v) * (1.0 - h)) - (βh(v) * h)
 end
 
-current_step= PresetTimeCallback(100,integrator -> integrator.p[8] += 1)
+#input: step currrent
+current_step= PresetTimeCallback(50,integrator -> integrator.p[8] += 0)
 
 # n, m & h steady-states
 n_inf(v) = αn(v) / (αn(v) + βn(v))
@@ -33,9 +34,11 @@ h_inf(v) = αh(v) / (αh(v) + βh(v))
 
 p = [35.0, 40.0, 0.3, -77.0, 55.0, -65.0, 1, 0]
 u0 = [-60, n_inf(-60), m_inf(-60), h_inf(-60)]
-tspan = (0.0, 1000)
+tspan = (0.0, 500)
 
 prob = ODEProblem(HH!, u0, tspan, p, callback=current_step)
 
 sol = solve(prob);
-plot(sol, vars=1)
+p1=plot(sol, vars=1,label="Vm")
+
+#p2=plot(sol, vars=[2,3,4], tspan=(105.0,130.0))
