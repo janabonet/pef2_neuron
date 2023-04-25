@@ -1,4 +1,4 @@
-using DifferentialEquations, Plots
+using DifferentialEquations, Plots, BenchmarkTools
 
 # Potassium (n) and sodium (m,h) ion-channel rate functions
 
@@ -73,6 +73,3 @@ sol = solve(prob, saveat = 0.1, callback = current_step)
 #figures
 plot(sol.t, sol[1,:], color = :blue ,title = "Time series of voltage", xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1)
 
-
-#  hola comentari de la jana
-# HOLA AIXO ES N COMENTATI DMEN POL
