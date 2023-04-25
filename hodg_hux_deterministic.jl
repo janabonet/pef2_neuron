@@ -75,4 +75,4 @@ plot(sol.t, sol[1,:], color = :blue ,title = "Time series of voltage", xlabel = 
 
 
 #  hola comentari de la jana
-
+# HOLA AIXO ES N COMENTATI DMEN POL
