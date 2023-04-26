@@ -36,11 +36,11 @@ end
 # Callback to change external current
 
 #constant current
-constant_current= PresetTimeCallback(0.01,integrator -> integrator.p[8] += 1)
+#constant_current= PresetTimeCallback(0.01,integrator -> integrator.p[8] += 1)
 #pulse current
 
 #step current
-step_current= PresetTimeCallback(100,integrator -> integrator.p[8] += 100)
+#step_current= PresetTimeCallback(100,integrator -> integrator.p[8] += 100)
 #ramp current
 
 # Parameters
@@ -53,7 +53,7 @@ g_k  = 35.0;
 g_l  = 0.3;
 C = 1.0;
 I_tot = 0.0;
-p = Float64[V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot];
+p =[V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot];
 
 #Initial conditions
 n_inf(v) = αn(v) / (αn(v) + βn(v));
@@ -63,12 +63,36 @@ v₀ = -60;
 u₀ = [v₀, n_inf(v₀), m_inf(v₀), h_inf(v₀)]
 tspan = (0,1000);
 
-# Integration
-prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
-sol = solve(prob, saveat = 0.1, callback = step_current)
+#threshold current for CONSTANT CURRENT input
+const_p1=plot()
+for j = LinRange(0.395,0.4,3)
+    local I_tot=j
+    local p =[V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot];
+    local prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
+    local sol=@time solve(prob,saveat=0.1)
+    plot!(sol.t,sol[1,:],title = "Threshold current for constant input", xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label=j)
 
+end
+display(const_p1)
+png("thresh_const")
 
-#figures
-fig1=plot(sol.t, sol[1,:] ,title = "Time series of voltage", xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1)
-#figpath = "C:/Users/janal/Uni/3t/Q6/pef2/projecte_neurona/figures/"
-#savefig(fig1,"constant_current_1")
+#firing frequency
+fir_freq=scatter()
+for j = LinRange(0,0.8,100)
+    local I_tot=j
+    local p =[V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot];
+    local prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
+    local sol=@time solve(prob,saveat=0.1)
+    pks,vals = findmaxima(sol[1,:],strict=true)
+    pics=size(pks)
+    temps=tspan[2]
+    freq_j=pics[1]/temps
+    jj=j
+    scatter!([freq_j,jj],title = "Firing frequency", xlabel = "I_input (microA/cm^2)", ylabel = "Firing frequency (Hz)", linewidth = 1,
+    lt = :scatter,
+    markersize = 1,
+    markerstrokewidth = 0,
+    color = :steelblue2,
+    legend=false)
+end
+display(fir_freq)
