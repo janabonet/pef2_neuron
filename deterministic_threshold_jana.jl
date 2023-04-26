@@ -78,21 +78,31 @@ png("thresh_const")
 
 #firing frequency
 fir_freq=scatter()
-for j = LinRange(0,0.8,100)
+I_vec=collect(0:0.01:0.8)
+freqs_vec=[]
+#for j = LinRange(0,0.8,100)
+for j in I_vec
     local I_tot=j
     local p =[V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot];
     local prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
-    local sol=@time solve(prob,saveat=0.1)
+    local sol=solve(prob,saveat=0.1)
     pks,vals = findmaxima(sol[1,:],strict=true)
     pics=size(pks)
-    temps=tspan[2]
-    freq_j=pics[1]/temps
-    jj=j
-    scatter!([freq_j,jj],title = "Firing frequency", xlabel = "I_input (microA/cm^2)", ylabel = "Firing frequency (Hz)", linewidth = 1,
+    freq_j=pics[1]/tspan[2]
+    push!(freqs_vec,freq_j)
+    #=
+    scatter!([j,freq_j],title = "Firing frequency", xlabel = "I_input (microA/cm^2)", ylabel = "Firing frequency (Hz)", linewidth = 1,
     lt = :scatter,
     markersize = 1,
     markerstrokewidth = 0,
     color = :steelblue2,
     legend=false)
+    =#
 end
+scatter!([I_vec,freqs_vec],title = "Firing frequency", xlabel = "I_input (microA/cm^2)", ylabel = "Firing frequency (Hz)", linewidth = 1,
+    lt = :scatter,
+    markersize = 1,
+    markerstrokewidth = 0,
+    color = :steelblue2,
+    legend=false)
 display(fir_freq)
