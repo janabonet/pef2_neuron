@@ -33,16 +33,6 @@ function hodg_hux_det(u, p, t)
     return [dV,dn,dm,dh]
 end
 
-# Callback to change external current
-
-#constant current
-#constant_current= PresetTimeCallback(0.01,integrator -> integrator.p[8] += 1)
-#pulse current
-
-#step current
-#step_current= PresetTimeCallback(100,integrator -> integrator.p[8] += 100)
-#ramp current
-
 # Parameters
 
 V_na = 55.0;
@@ -52,7 +42,7 @@ g_na = 40.0;
 g_k  = 35.0;
 g_l  = 0.3;
 C = 1.0;
-I_tot = 0.0;
+I_tot = 5;
 p =[V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot];
 
 #Initial conditions
@@ -64,6 +54,7 @@ u₀ = [v₀, n_inf(v₀), m_inf(v₀), h_inf(v₀)]
 tspan = (0,1000);
 
 #threshold current for CONSTANT CURRENT input
+constant_current= PresetTimeCallback(0.01,integrator -> integrator.p[8] += 1)
 const_p1=plot()
 for j = LinRange(0.395,0.4,3)
     local I_tot=j
@@ -76,10 +67,39 @@ end
 display(const_p1)
 png("thresh_const")
 
+#threshold current for STEP CURRENT input
+plot()
+step_current= PresetTimeCallback(200,integrator -> integrator.p[8] += 3)
+prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
+sol = solve(prob, saveat = 0.1, callback = step_current)
+plot!(sol.t,sol[1,:],title = "Threshold current for step input", xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1)
+
+
+step1_p1=plot()
+for step=LinRange(0.1,9,3)
+    step_j= PresetTimeCallback(100,integrator -> integrator.p[8] += step)
+    prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
+    sol = solve(prob, saveat = 0.1, callback = step_j)
+    plot!(sol.t,sol[1,:],title = "Threshold current for step input, I_0="*string(I_tot), xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label=step)
+end
+display(step1_p1)
+png("thresh_step"*string(I_tot))
+
+
+#threshold current for PULSE CURRENT input
+plot()
+
+
+#threshold current for RAMP CURRENT input
+plot()
+
+
+
+#=
 #firing frequency
 fir_freq=scatter()
 I_vec=collect(0:0.01:0.8)
-freqs_vec=[]
+freqs_vec=[];
 #for j = LinRange(0,0.8,100)
 for j in I_vec
     local I_tot=j
@@ -99,10 +119,11 @@ for j in I_vec
     legend=false)
     =#
 end
-scatter!([I_vec,freqs_vec],title = "Firing frequency", xlabel = "I_input (microA/cm^2)", ylabel = "Firing frequency (Hz)", linewidth = 1,
+scatter!([I_vec,@. 1/freqs_vec],title = "Firing frequency", xlabel = "I_input (microA/cm^2)", ylabel = "Firing frequency (Hz)", linewidth = 1,
     lt = :scatter,
     markersize = 1,
     markerstrokewidth = 0,
     color = :steelblue2,
     legend=false)
-display(fir_freq)
+display(fir_freq)   
+=#
