@@ -42,7 +42,7 @@ g_na = 40.0;
 g_k  = 35.0;
 g_l  = 0.3;
 C = 1.0;
-I_tot = 0;
+I_tot = 1.5;
 p =[V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot];
 
 #Initial conditions
@@ -53,24 +53,6 @@ v₀ = -60;
 u₀ = [v₀, n_inf(v₀), m_inf(v₀), h_inf(v₀)]
 tspan = (0,1000);
 
-
-#threshold current for RAMP CURRENT input
-plot()
-ramp_I=
-
-
-
-#threshold current for PULSE CURRENT input
-plot()
-I_up=0.1;
-pulse_up=PresetTimeCallback(100, integrator -> integrator.p[8] += I_up)
-pulse_down=PresetTimeCallback(500, integrator -> integrator.p[8] -= I_up)
-pulse=CallbackSet(pulse_up,pulse_down)
-prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
-sol = solve(prob, saveat = 0.1, callback = pulse)
-plot!(sol.t,sol[1,:],title = "Step input, I_0="*string(I_tot)*"; I_up="*string(I_up), 
-xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1)
-png("thresh_pulse_"*string(I_up))
 
 #threshold current for CONSTANT CURRENT input
 constant_current= PresetTimeCallback(0.01,integrator -> integrator.p[8] += 1)
@@ -88,21 +70,71 @@ png("thresh_const")
 
 #threshold current for STEP CURRENT input
 plot()
-step_current= PresetTimeCallback(200,integrator -> integrator.p[8] += 3)
+step_current= PresetTimeCallback(200,integrator -> integrator.p[8] += 6)
 prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
 sol = solve(prob, saveat = 0.1, callback = step_current)
 plot!(sol.t,sol[1,:],title = "Threshold current for step input", xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1)
 
 
 step1_p1=plot()
-for step=LinRange(0.1,9,3)
-    step_j= PresetTimeCallback(100,integrator -> integrator.p[8] += step)
+for steps=LinRange(0.1,04,18)
+    p[8] = 0
+    step_j= PresetTimeCallback(200,integrator -> integrator.p[8] += steps)
     prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
     sol = solve(prob, saveat = 0.1, callback = step_j)
-    plot!(sol.t,sol[1,:],title = "Threshold current for step input, I_0="*string(I_tot), xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label=step)
+    step1_p1=plot(sol.t,sol[1,:],title = "Step input, I_0="*string(I_tot), xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label=steps)
+    display(step1_p1)
 end
 display(step1_p1)
 png("thresh_step"*string(I_tot))
+
+
+
+
+#threshold current for PULSE CURRENT input
+plot()
+I_up=0.1;
+pulse_up=PresetTimeCallback(100, integrator -> integrator.p[8] += I_up)
+pulse_down=PresetTimeCallback(500, integrator -> integrator.p[8] -= I_up)
+pulse=CallbackSet(pulse_up,pulse_down)
+prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
+sol = solve(prob, saveat = 0.1, callback = pulse)
+plot!(sol.t,sol[1,:],title = "Step input, I_0="*string(I_tot)*"; I_up="*string(I_up), 
+xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1)
+png("thresh_pulse_"*string(I_up))
+
+
+#threshold current for RAMP CURRENT input
+plot()
+t1=100;
+t2=500;
+I1=I_tot;
+I2=0.1;
+p =[V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot,t1,I1,t2,I2];
+
+function ramp!(t,u,integrator) 
+    let 
+        global t1,t2,I1,I2
+    end
+    t1,I1,t2,I2 = p[9:12]
+    if t<t1
+        integrator.p[8] = I1
+    elseif t >= t1
+        integrator.p[8] = integrator.p[8] + (t-t1) * (I2-I1)/(t2-t1)
+    elseif t >= t2
+        integrator.p[8] = I2
+    end
+end
+
+cb = ContinuousCallback(ramp!,tspan);
+prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01);
+sol = solve(prob, saveat = 0.1, callback = cb)
+plot!(sol.t,sol[1,:],title = "Ramp input, I_0="*string(I_tot)*"; I_up="*string(ramp_up), 
+xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1)
+png("thresh_pulse_"*string(I_up))
+
+
+
 
 
 

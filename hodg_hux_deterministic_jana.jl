@@ -39,7 +39,7 @@ end
 constant_current= PresetTimeCallback(0.01,integrator -> integrator.p[8] += 6)
 #pulse current
 #step current
-step_current= PresetTimeCallback(100,integrator -> integrator.p[8] += 8)
+step_current= PresetTimeCallback(100,integrator -> integrator.p[8] += 1)
 #ramp current
 
 # Parameters
@@ -47,7 +47,7 @@ step_current= PresetTimeCallback(100,integrator -> integrator.p[8] += 8)
 V_na = 55.0;
 V_k  = -77.0; 
 V_l  = -65.0;
-g_na = 40.0;
+g_na = 45.0;
 g_k  = 35.0;
 g_l  = 0.3;
 C = 1.0;
@@ -70,7 +70,7 @@ sol = solve(prob, saveat = 0.1, callback = step_current)
 
 #figures
 fig1=plot(sol.t, sol[1,:] ,title = "Time series of voltage", xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label="V")
-
+display(fig1)
 fig2=plot(sol.t,sol[2,:],title="Gating variables",xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label="n")
 plot!(sol.t,sol[3,:],title="Gating variables",xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label="m")
 plot!(sol.t,sol[4,:],title="Gating variables",xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label="h")
