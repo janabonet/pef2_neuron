@@ -42,7 +42,7 @@ g_na = 40.0;
 g_k  = 35.0;
 g_l  = 0.3;
 C = 1.0;
-I_tot = 5;
+I_tot = 0;
 p =[V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot];
 
 #Initial conditions
@@ -52,6 +52,25 @@ h_inf(v) = αh(v) / (αh(v) + βh(v));
 v₀ = -60;
 u₀ = [v₀, n_inf(v₀), m_inf(v₀), h_inf(v₀)]
 tspan = (0,1000);
+
+
+#threshold current for RAMP CURRENT input
+plot()
+ramp_I=
+
+
+
+#threshold current for PULSE CURRENT input
+plot()
+I_up=0.1;
+pulse_up=PresetTimeCallback(100, integrator -> integrator.p[8] += I_up)
+pulse_down=PresetTimeCallback(500, integrator -> integrator.p[8] -= I_up)
+pulse=CallbackSet(pulse_up,pulse_down)
+prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01)
+sol = solve(prob, saveat = 0.1, callback = pulse)
+plot!(sol.t,sol[1,:],title = "Step input, I_0="*string(I_tot)*"; I_up="*string(I_up), 
+xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1)
+png("thresh_pulse_"*string(I_up))
 
 #threshold current for CONSTANT CURRENT input
 constant_current= PresetTimeCallback(0.01,integrator -> integrator.p[8] += 1)
@@ -86,12 +105,9 @@ display(step1_p1)
 png("thresh_step"*string(I_tot))
 
 
-#threshold current for PULSE CURRENT input
-plot()
 
 
-#threshold current for RAMP CURRENT input
-plot()
+
 
 
 
