@@ -16,7 +16,7 @@ m_inf(v) = αm(v) / (αm(v) + βm(v))
 h_inf(v) = αh(v) / (αh(v) + βh(v))
 
 # Hodgkin Huxley model 
-function hodg_hux(u::SVector{4,Float64}, pu::SVector{9,Float64}, t::Float64)
+function hodg_hux(u::SVector{4,Float64}, p::SVector{9,Float64}, t::Float64)
     V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot = p
     # References to variables
     V =  u[1]
@@ -43,38 +43,66 @@ end
 
 # Parameters
 
-const V_na = 55.0;
-const V_k  = -77.0; 
-const V_l  = -65.0;
-const g_na = 40.0;
-const g_k  = 35.0;
-const g_l  = 0.3;
-const C = 1.0;
-const I_tot = 0.0;
-D = 0.1  
+V_na = 55.0;
+V_k  = -77.0; 
+V_l  = -65.0;
+g_na = 40.0;
+g_k  = 35.0;
+g_l  = 0.3;
+C = 1.0;
+I_tot = 0.0;
+D = 0.8 
 p = @SVector [V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot, D]
 
 #Initial conditions
 v₀ = -60;
 u₀ = @SVector [v₀, n_inf(v₀), m_inf(v₀), h_inf(v₀)]
-tspan = (0.0,500.0);
+tspan = (0.0,2000.0);
 
 # Integration
-prob = SDEProblem(hodg_hux,noise_fun,u₀, tspan, p,  dtmax = 0.01, dtmin = 1e-5)
-@time sol = solve(prob,EM(), saveat = 0.1, dt = 1e-4)
+prob = SDEProblem(hodg_hux,noise_fun,u₀, tspan, p)
+sol = solve(prob,EM(), saveat = 0.3, dt = 1e-4)
 
 #figure
-p1 = plot(sol.t, sol[1,:],title = "Time series of voltage \n D = "*string(D), xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1, xlims = (0,10100), ylims = (-65,0), background_color_legend = nothing, foreground_color_legend = nothing)
-# savefig(p1,"hh_stoch_D-"*string(D)*".png")
+p1 = plot(sol.t, sol[1,:],title = "Time series of voltage \n D = "*string(D), xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1, xlims = tspan, ylims = (-65,0), background_color_legend = nothing, foreground_color_legend = nothing, label = "")
+png(p1,"hh_stoch_D-"*string(D))
 
 
-# Per provar amb diferents valors de D
-prob_func = let p = p
-    (prob, i, repeat) -> begin
-        D 
-        remake(prob, p = vcat(p[1:8], D))
-    end
+# Integration with different parameters
+D_vec = collect(5.1:0.1:15)
+for D in D_vec
+    local p = @SVector [V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot, D]
+    prob = SDEProblem(hodg_hux,noise_fun,u₀, tspan, p)
+    sol = @time solve(prob,EM(), saveat = 0.3, dt = 1e-4);
+    
+    #figure
+    p1 = @time plot(sol.t, sol[1,:],title = "Time series of voltage \n D = "*string(D), xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1, xlims = tspan, ylims = (-65,0), background_color_legend = nothing, foreground_color_legend = nothing, label = "");
+    png(p1,"hh_stoch_D-"*string(D))
 end
 
-ensembleprob = EnsembleProblem(prob)
-sol = solve(ensembleprob, EnsembleThreads(), trajectories = 10)
+
+
+
+# # Per provar amb diferents valors de D
+# prob_func = let p = p
+#     (prob, i, repeat) -> begin
+#         remake(prob, p = vcat(p[1:8], D_vec[i]))
+#     end
+# end
+
+# ensembleprob = EnsembleProblem(prob, prob_func = prob_func)
+# sol = solve(ensembleprob, EnsembleThreads(), trajectories = length(D_vec))
+
+
+# plot(sol, linealpha = 0.6, color = :steelblue2, idxs = (0, 1), title = "V")
+
+# summ = EnsembleSummary(sol, 0:0.1:1000)
+
+# plot(summ , fillalpha = 0.5)
+# j = 2
+# pp =   plot(sol[:,j][1,:], color =  :steelblue2, title = "Time series of voltage \n D = "*string(D_vec[j]), xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1, xlims = tspan, ylims = (-65,0), background_color_legend = nothing, foreground_color_legend = nothing, label = "")
+# for i in eachindex(D_vec)
+#     pp =   plot(sol[:,i][1,:], color =  :steelblue2, title = "Time series of voltage \n D = "*string(D_vec[i]), xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1, xlims = tspan, ylims = (-65,0), background_color_legend = nothing, foreground_color_legend = nothing, label = "")
+#     png(pp,"hh_stoch_D-"*string(D_vec[i]))
+#     println("Iteration: "*string(i))
+# end
