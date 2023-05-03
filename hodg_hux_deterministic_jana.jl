@@ -69,6 +69,7 @@ sol = solve(prob, saveat = 0.1, callback = step_current)
 
 
 #figures
+plot()
 fig1=plot(sol.t, sol[1,:] ,title = "Time series of voltage", xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label="V")
 display(fig1)
 fig2=plot(sol.t,sol[2,:],title="Gating variables",xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label="n")
