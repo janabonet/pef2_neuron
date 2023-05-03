@@ -12,7 +12,6 @@ using DifferentialEquations, Plots, StaticArrays
 
 # Hodgkin Huxley model 
 
-βₕ
 function hodg_hux_gates(u, p, t)
     V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot = p
     # References to variables
