@@ -3,7 +3,7 @@ using DifferentialEquations, Plots, BenchmarkTools, StaticArrays
 # Potassium (n) and sodium (m,h) ion-channel rate functions
 
 αn(V)=(0.02 * (V - 25.0)) / (1.0 - exp((-1.0 * (V - 25.0)) / 9.0));
-αm(V)=(0.182*(V + 35.0)) / (1.0 - exp((-1.0 * (V + 35.0)) / 9.0));
+Çαm(V)=(0.182*(V + 35.0)) / (1.0 - exp((-1.0 * (V + 35.0)) / 9.0));
 αh(V)= 0.25 * exp((-1.0 * (V + 90.0)) / 12.0);
 
 βn(V)=(-0.002 * (V - 25.0)) / (1.0 - exp((V - 25.0) / 9.0));
@@ -86,6 +86,7 @@ h_inf(v) = αh(v) / (αh(v) + βh(v));
 v₀ = -60;
 #u₀ = [v₀, n_inf(v₀), m_inf(v₀), h_inf(v₀)]
 u₀ = @SVector [v₀, n_inf(v₀),n_inf(v₀),n_inf(v₀),n_inf(v₀),n_inf(v₀), m_inf(v₀), h_inf(v₀),h_inf(v₀),h_inf(v₀),h_inf(v₀),h_inf(v₀),h_inf(v₀),h_inf(v₀)];
+u
 tspan = (0,1000);
 
 # Integration
@@ -100,3 +101,6 @@ fig1=plot(sol.t, sol[1,:] ,title = "Time series of voltage, gates", xlabel = "t 
 fig2=plot(sol.t,sol[3,:],title="Gating variables, det",xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label="n1")
 plot!(sol.t,ms,title="Gating variables",xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label="m")
 plot!(sol.t,hs,title="Gating variables",xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1,label="h")
+
+
+

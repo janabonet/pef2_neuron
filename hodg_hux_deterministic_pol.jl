@@ -64,3 +64,8 @@ sol = solve(prob, saveat = 0.1, callback = current_step)
 #figures
 plot(sol.t, sol[1,:] ,title = "Time series of voltage", xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1)
 
+p2 = plot()
+for i in 2:4
+    plot!(sol.t, sol[i,:] ,title = "Time series of voltage", xlabel = "t (ms)", ylabel = "V (mV)", linewidth = 1)
+end
+display(p2)
