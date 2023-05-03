@@ -34,23 +34,19 @@ function hodg_hux_gates(u, p, t)
     m₃h₀ = u[14]
 
     # Channel currents
-    #I_na =  g_na * m^3 * h * (V - V_na);
     I_na = g_na * m₃h₁ * (V - V_na)
-    #I_k  =  g_k * n^4 * (V - V_k)
     I_k = g_k * n₄ * (V - V_k)
     I_l = g_l * (V - V_l)
 
     # ODE system
-    dV = 1 / C * (I_tot - I_na - I_k - I_l)
+    dV = 1 / C * (I_ext - I_na - I_k - I_l)
     #dn =  αₙ(V) * (1 - n) - βₙ(V)*n
-    dn₀ = -4 * αₙ(V) * n₀ + βₙ(V) * n₁
-    dn₁ = -(3 * αₙ(V) + βₙ(V)) * n₁ + 4 * αₙ(V) * n₀ + 2 * βₙ(V) * n₂
-    dn₂ = -(2 * αₙ(V) + 2 * βₙ(V)) * n₂ + 3 * αₙ(V) * n₁ + 3 * βₙ(V) * n₃
-    dn₃ = -(αₙ(V) + 3 * βₙ(V)) * n₃ + 2 * αₙ(V) * n₃ + 4 * βₙ(V) * n₄
-    dn₄ = -4 * βₙ(V) * n₄ + αₙ(V) * n₃
+    dn₀ = -4*αₙ(V)*n₀ + βₙ(V)*n₁
+    dn₁ = -(3*αₙ(V) + βₙ(V))*n₁ + 4*αₙ(V)*n₀ + 2*βₙ(V)*n₂
+    dn₂ = -(2*αₙ(V) + 2*βₙ(V))*n₂ + 3*αₙ(V)*n₁ + 3*βₙ(V)*n₃
+    dn₃ = -(αₙ(V)+3*βₙ(V))*n₃ + 2*αₙ(V)*n₃ + 4*βₙ(V)*n₄
+    dn₄ = -4*βₙ(V)*n₄ + αₙ(V)*n₃
 
-    #dm =  αₘ(V) * (1 - m) - βₘ(V)*m;
-    #dh =  αₕ(V) * (1 - h) - βₕ(V)*h;
     dm₀h₁ = -(3*αₘ(V) + βₕ(V))*m₀h₁ + βₘ(V)*m₁h₁ + αₕ(V)*m₀h₀
     dm₁h₁ = -(2*αₘ(V) + βₘ(V)+βₕ(V))*m₁h₁ + 3*αₘ(V)*m₀h₁ + 2*βₘ(V)*m₂h₁ + αₕ(V)*m₁h₀
     dm₂h₁ = -(αₘ(V) + 2*βₘ(V) + βₕ(V))*m₂h₁ + 3*βₘ(V)*m₃h₁ + 2*αₘ(V)*m₁h₁ + αₕ(V)*m₂h₀
@@ -76,8 +72,8 @@ g_na = 45.0;
 g_k = 35.0;
 g_l = 0.3;
 C = 1.0;
-I_tot = 0.0;
-p = [V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot];
+I_ext = 0.0;
+p = [V_na, V_k, V_l, g_na, g_k, g_l, C, I_ext];
 
 #Initial conditions
 n_inf(v) = αₙ(v) / (αₙ(v) + βₙ(v));
