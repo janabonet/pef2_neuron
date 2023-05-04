@@ -103,15 +103,14 @@ p = [V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot];
 n_inf(v) = αn(v) / (αn(v) + βn(v));
 m_inf(v) = αm(v) / (αm(v) + βm(v));
 h_inf(v) = αh(v) / (αh(v) + βh(v));
-
+v₀ = -60.0
+u₀ = @SVector [v₀, 0, n_inf(v₀), 0, 0, 0, m_inf(v₀), h_inf(v₀)]
 u₀ = @SVector rand(8)
 tspan = (0, 1000)
 
 # Integration
 prob = ODEProblem(hodg_hux_gates, u₀, tspan, p, dtmax = 0.01);
 sol = solve(prob, saveat = 0.1, callback = step_current);
-
-ntot = @.sol[3,:] + sol[4,:] + sol[5,:] + sol[6,:]
 
 u02 = SVector{4,Float64}(vcat(u₀[1],u₀[3], u₀[7:8]))
 u₀₂ = SA[v₀, n_inf(v₀), m_inf(v₀), h_inf(v₀)]
@@ -144,7 +143,7 @@ plot!(
 
 
 fig2 = plot(
-    sol.t, ntot,
+    sol.t, sol[3,:],
    # title = "Gating variables",
     xlabel = "t (ms)",
     ylabel = "V (mV)",
@@ -170,19 +169,21 @@ plot!(
     label = "h",
 )
 figz = plot()
-str = ["n2","m2","h2"]
-for i in 2:4
-    println(i)
+str = ["n1","m","h"]
+j = 0
+for i in [3,7,8]
+    j += 1
     plot!(
-        sol2.t,
-        sol2[i,:],
+        sol.t,sol[i,:],
       #  title = "Gating variables",
         xlabel = "t (ms)",
         ylabel = "V (mV)",
         linewidth = 1,
-        label = str[i-1],
+        label = str[j],
     )
 end
+display(figz)
+fig3 = plot(sol2, idxs = (0,2:4))
 
-
+plot(figz,fig3, layout = (2,1))
 p1 = plot(fig1,fig2,figz, layout = (3,1))

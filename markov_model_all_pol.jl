@@ -121,8 +121,7 @@ fig2 = plot(
     label = "n₁",
 )
 plot!(
-    sol.t,
-    ms,
+    sol.t, ms,
     title = "Gating variables",
     xlabel = "t (ms)",
     ylabel = "V (mV)",
