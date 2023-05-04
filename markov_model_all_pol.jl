@@ -36,7 +36,7 @@ function hodg_hux_gates(u, p, t)
 
     # ODE system
     dV = 1 / C * (I_ext - I_na - I_k - I_l)
-    #dn =  αₙ(V) * (1 - n) - βₙ(V)*n
+
     dn₀ = -4*αₙ(V)*n₀ + βₙ(V)*n₁
     dn₁ = -(3*αₙ(V) + βₙ(V))*n₁ + 4*αₙ(V)*n₀ + 2*βₙ(V)*n₂
     dn₂ = -(2*αₙ(V) + 2*βₙ(V))*n₂ + 3*αₙ(V)*n₁ + 3*βₙ(V)*n₃
@@ -62,7 +62,7 @@ step_current = PresetTimeCallback(100, integrator -> integrator.p[8] += 1);
 V_na = 55.0;
 V_k = -77.0;
 V_l = -65.0;
-g_na = 45.0;
+g_na = 40.0;
 g_k = 35.0;
 g_l = 0.3;
 C = 1.0;
@@ -75,30 +75,16 @@ n_inf(v) = αₙ(v) / (αₙ(v) + βₙ(v));
 m_inf(v) = αₘ(v) / (αₘ(v) + βₘ(v));
 h_inf(v) = αₕ(v) / (αₕ(v) + βₕ(v));
 v₀ = -60;
-u₀ = @SVector [
-    v₀,
-    n_inf(v₀),
-    n_inf(v₀),
-    n_inf(v₀),
-    n_inf(v₀),
-    n_inf(v₀),
-    m_inf(v₀),
-    m_inf(v₀),
-    m_inf(v₀),
-    m_inf(v₀),
-    h_inf(v₀),
-]
+u₀ = @SVector [v₀, n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), h_inf(v₀)]
 
 p[8] = 0
 u₀ = @SVector rand(11)
 tspan = (0, 1000);
 
+plotly()
 # Integration
 prob = ODEProblem(hodg_hux_gates, u₀, tspan, p, dtmax = 0.01);
 sol = solve(prob, saveat = 0.1, callback = step_current);
-
-# ms = sol[8, :] + sol[12, :];
-# hs = sol[7, :] + sol[8, :] + sol[9, :] + sol[10, :];
 
 #figures
 fig1 = plot(
@@ -137,3 +123,12 @@ plot!(
     linewidth = 1,
     label = "h",
 )
+
+
+fig1 = plot(sol, idxs = (0,[6,10,11]))
+
+fig2 = plot(sol2.t, sol2[2,:].^4);
+    plot!(sol2.t, sol2[3,:].^3);
+    plot!(sol2.t, sol2[4,:]);
+
+plot(fig1, fig2, layout = (2,1))
