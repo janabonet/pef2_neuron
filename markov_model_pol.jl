@@ -143,7 +143,7 @@ plot!(
 
 
 fig2 = plot(
-    sol.t, sol[3,:],
+    sol.t, sol[6,:],
    # title = "Gating variables",
     xlabel = "t (ms)",
     ylabel = "V (mV)",
@@ -169,9 +169,9 @@ plot!(
     label = "h",
 )
 figz = plot()
-str = ["n1","m","h"]
+str = ["n4","m","h"]
 j = 0
-for i in [3,7,8]
+for i in [6,7,8]
     j += 1
     plot!(
         sol.t,sol[i,:],
@@ -183,7 +183,10 @@ for i in [3,7,8]
     )
 end
 display(figz)
-fig3 = plot(sol2, idxs = (0,2:4))
+fig3 = plot(sol2, idxs = (0,3:4), label = ["m", "h"])
+        plot!(sol2.t, sol2[2,:].^4, label = "n^4")
 
 plot(figz,fig3, layout = (2,1))
+
+
 p1 = plot(fig1,fig2,figz, layout = (3,1))
