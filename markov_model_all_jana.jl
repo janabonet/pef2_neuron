@@ -168,4 +168,5 @@ fig3 = plot(sol_det.t, sol_det[2,:].^4,label="n^4_hh",linecolor=:blue)
     plot!(sol_det.t, sol_det[4,:],label="h_hh",linecolor=:green)
     plot!(sol_det.t, sol_det[3,:].^3, label = "m^3_hh",linecolor=:orange)
 
-plot(fig2,fig3, layout = (2,1))
+fig_comparison=plot(fig2,fig3, layout = (2,1))
+savefig(fig_comparison,"hh_gates_comp")
