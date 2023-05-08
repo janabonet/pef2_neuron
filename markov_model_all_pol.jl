@@ -53,8 +53,38 @@ function hodg_hux_gates(u, p, t)
     @SVector [dV, dn₀, dn₁, dn₂, dn₃, dn₄, dm₀, dm₁, dm₂, dm₃, dh]
 end
 
+αn(V)=(0.02 * (V - 25.0)) / (1.0 - exp((-1.0 * (V - 25.0)) / 9.0))
+αm(V)=(0.182*(V + 35.0)) / (1.0 - exp((-1.0 * (V + 35.0)) / 9.0))
+αh(V)= 0.25 * exp((-1.0 * (V + 90.0)) / 12.0)
+
+βn(V)=(-0.002 * (V - 25.0)) / (1.0 - exp((V - 25.0) / 9.0))
+βm(V)=(-0.124 * (V + 35.0)) / (1.0 - exp((V + 35.0) / 9.0))
+βh(V)=(0.25 * exp((V + 62.0) / 6.0)) / exp((V + 90.0) / 12.0)
+
+# Hodgkin Huxley model 
+function hodg_hux_det(u, p, t)
+    V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot = p
+    # References to variables
+    V = u[1]
+    n = u[2]
+    m = u[3]
+    h = u[4]
+
+    # Channel currents
+    I_na =  g_na * m^3 * h * (V - V_na)
+    I_k  =  g_k * n^4 * (V - V_k)
+    I_l  =  g_l * (V- V_l)
+   
+    # ODE system
+     dV =  1/C * (I_tot -I_na - I_k - I_l)
+     dn =  αn(V) * (1 - n) - βn(V)*n
+     dm =  αm(V) * (1 - m) - βm(V)*m
+     dh =  αh(V) * (1 - h) - βh(V)*h
+    @SVector [dV,dn,dm,dh]
+end
+
 # Callback to change external current
-constant_current = PresetTimeCallback(0.01, integrator -> integrator.p[8] += 6);
+#constant_current = PresetTimeCallback(0.01, integrator -> integrator.p[8] += 6);
 step_current = PresetTimeCallback(100, integrator -> integrator.p[8] += 1);
 
 # Parameters
@@ -71,11 +101,11 @@ I_ext = 0.0;
 p = [V_na, V_k, V_l, g_na, g_k, g_l, C, I_ext];
 
 #Initial conditions
-n_inf(v) = αₙ(v) / (αₙ(v) + βₙ(v));
-m_inf(v) = αₘ(v) / (αₘ(v) + βₘ(v));
-h_inf(v) = αₕ(v) / (αₕ(v) + βₕ(v));
-v₀ = -60;
-u₀ = @SVector [v₀, n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), h_inf(v₀)]
+# n_inf(v) = αₙ(v) / (αₙ(v) + βₙ(v));
+# m_inf(v) = αₘ(v) / (αₘ(v) + βₘ(v));
+# h_inf(v) = αₕ(v) / (αₕ(v) + βₕ(v));
+# v₀ = -60;
+# u₀ = @SVector [v₀, n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), h_inf(v₀)]
 
 p[8] = 0
 u₀ = @SVector rand(11)
@@ -86,6 +116,10 @@ plotly()
 prob = ODEProblem(hodg_hux_gates, u₀, tspan, p, dtmax = 0.01);
 sol = solve(prob, saveat = 0.1, callback = step_current);
 
+p[8] = 0
+u₀₂ = SVector{4,Float64}(vcat(u₀[1],u₀[2], u₀[10:11]))
+prob2 = ODEProblem(hodg_hux_det,u₀₂, tspan, p,  dtmax = 0.01);
+sol2 = solve(prob2, saveat = 0.1, callback = step_current);
 #figures
 fig1 = plot(
     sol.t, sol[1, :],
@@ -95,40 +129,19 @@ fig1 = plot(
     linewidth = 1,
     label = "V",
 )
-
-
-fig2 = plot(
-    sol.t,
-    sol[3, :],
-    title = "Gating variables, det",
-    xlabel = "t (ms)",
-    ylabel = "V (mV)",
-    linewidth = 1,
-    label = "n₁",
-)
 plot!(
-    sol.t, ms,
-    title = "Gating variables",
+    sol.t, sol2[1, :],
+    title = "Time series of voltage, gates",
     xlabel = "t (ms)",
     ylabel = "V (mV)",
     linewidth = 1,
-    label = "m",
-)
-plot!(
-    sol.t,
-    hs,
-    title = "Gating variables",
-    xlabel = "t (ms)",
-    ylabel = "V (mV)",
-    linewidth = 1,
-    label = "h",
+    label = "V",
 )
 
+fig2 = plot(sol, idxs = (0,[6,10,11]))
 
-fig1 = plot(sol, idxs = (0,[6,10,11]))
-
-fig2 = plot(sol2.t, sol2[2,:].^4);
+fig3 = plot(sol2.t, sol2[2,:].^4);
     plot!(sol2.t, sol2[3,:].^3);
     plot!(sol2.t, sol2[4,:]);
 
-plot(fig1, fig2, layout = (2,1))
+plot(fig2, fig3, layout = (2,1))

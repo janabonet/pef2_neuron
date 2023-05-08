@@ -29,7 +29,7 @@ function hodg_hux_det(u, p, t)
      dn =  αn(V) * (1 - n) - βn(V)*n
      dm =  αm(V) * (1 - m) - βm(V)*m
      dh =  αh(V) * (1 - h) - βh(V)*h
-    return [dV,dn,dm,dh]
+    @SVector [dV,dn,dm,dh]
 end
 # Callback to change external current
 
