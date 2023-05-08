@@ -53,14 +53,6 @@ function hodg_hux_gates(u, p, t)
     @SVector [dV, dn₀, dn₁, dn₂, dn₃, dn₄, dm₀, dm₁, dm₂, dm₃, dh]
 end
 
-αn(V)=(0.02 * (V - 25.0)) / (1.0 - exp((-1.0 * (V - 25.0)) / 9.0))
-αm(V)=(0.182*(V + 35.0)) / (1.0 - exp((-1.0 * (V + 35.0)) / 9.0))
-αh(V)= 0.25 * exp((-1.0 * (V + 90.0)) / 12.0)
-
-βn(V)=(-0.002 * (V - 25.0)) / (1.0 - exp((V - 25.0) / 9.0))
-βm(V)=(-0.124 * (V + 35.0)) / (1.0 - exp((V + 35.0) / 9.0))
-βh(V)=(0.25 * exp((V + 62.0) / 6.0)) / exp((V + 90.0) / 12.0)
-
 # Hodgkin Huxley model 
 function hodg_hux_det(u, p, t)
     V_na, V_k, V_l, g_na, g_k, g_l, C, I_tot = p
@@ -77,9 +69,9 @@ function hodg_hux_det(u, p, t)
    
     # ODE system
      dV =  1/C * (I_tot -I_na - I_k - I_l)
-     dn =  αn(V) * (1 - n) - βn(V)*n
-     dm =  αm(V) * (1 - m) - βm(V)*m
-     dh =  αh(V) * (1 - h) - βh(V)*h
+     dn =  αₙ(V) * (1 - n) - βₙ(V)*n
+     dm =  αₘ(V) * (1 - m) - βₘ(V)*m
+     dh =  αₕ(V) * (1 - h) - βₕ(V)*h
     @SVector [dV,dn,dm,dh]
 end
 
@@ -101,22 +93,21 @@ I_ext = 0.0;
 p = [V_na, V_k, V_l, g_na, g_k, g_l, C, I_ext];
 
 #Initial conditions
-# n_inf(v) = αₙ(v) / (αₙ(v) + βₙ(v));
-# m_inf(v) = αₘ(v) / (αₘ(v) + βₘ(v));
-# h_inf(v) = αₕ(v) / (αₕ(v) + βₕ(v));
-# v₀ = -60;
-# u₀ = @SVector [v₀, n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), h_inf(v₀)]
+n_inf(v) = αₙ(v) / (αₙ(v) + βₙ(v));
+m_inf(v) = αₘ(v) / (αₘ(v) + βₘ(v));
+h_inf(v) = αₕ(v) / (αₕ(v) + βₕ(v));
+v₀ = -60;
+u₀ = @SVector [v₀, n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), h_inf(v₀)]
 
-p[8] = 0
+p[8] = 0.0
 u₀ = @SVector rand(11)
 tspan = (0, 1000);
 
-plotly()
 # Integration
 prob = ODEProblem(hodg_hux_gates, u₀, tspan, p, dtmax = 0.01);
-sol = solve(prob, saveat = 0.1, callback = step_current);
+sol = solve(prob, saveat = 0.1)#, callback = step_current);
 
-p[8] = 0
+p[8] = 0.0
 u₀₂ = SVector{4,Float64}(vcat(u₀[1],u₀[2], u₀[10:11]))
 prob2 = ODEProblem(hodg_hux_det,u₀₂, tspan, p,  dtmax = 0.01);
 sol2 = solve(prob2, saveat = 0.1, callback = step_current);
@@ -127,19 +118,21 @@ fig1 = plot(
     xlabel = "t (ms)",
     ylabel = "V (mV)",
     linewidth = 1,
-    label = "V",
+    label = "V, amb eqs. gates",
 )
 plot!(
-    sol.t, sol2[1, :],
+    sol2.t, sol2[1, :],
     title = "Time series of voltage, gates",
     xlabel = "t (ms)",
     ylabel = "V (mV)",
     linewidth = 1,
-    label = "V",
+    label = "V, hh original",
 )
 
+# n₄, m₃, h
 fig2 = plot(sol, idxs = (0,[6,10,11]))
 
+# n⁴, m³, h
 fig3 = plot(sol2.t, sol2[2,:].^4);
     plot!(sol2.t, sol2[3,:].^3);
     plot!(sol2.t, sol2[4,:]);
