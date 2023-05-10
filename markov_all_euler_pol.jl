@@ -1,4 +1,5 @@
-using Plots
+using Plots, LoopVectorization, Distributions
+
 # Potassium (n) and sodium (m,h) ion-channel rate functions
 
 αₙ(V) = (0.02 * (V - 25.0)) / (1.0 - exp((-1.0 * (V - 25.0)) / 9.0));
@@ -80,7 +81,7 @@ function euler(f::Function, u0::Vector{Float64}, p::Vector{Float64},tspan::Tuple
     for i in 1:Int(100/h)
         u[:,i+1] = u[:,i] + h*f(u[:,i],p,t[i])
     end
-    p[8] += 1;
+    p[8] += 0;
     for i in Int(100/h+1):n
         u[:,i+1] = u[:,i] + h*f(u[:,i],p,t[i]) #+sqrt(step)*D*rand(d,1) # D es amplitud i d soroll gaussia.
     end
@@ -91,8 +92,6 @@ struct solution
     u::Matrix{Float64}
 end
 
-
-
 V_na = 55.0;
 V_k = -77.0;
 V_l = -65.0;
@@ -100,17 +99,31 @@ g_na = 40.0;
 g_k = 35.0;
 g_l = 0.3;
 C = 1.0;
-I_ext = 0.0;
+I_ext = 1.0;
 p = [V_na, V_k, V_l, g_na, g_k, g_l, C, I_ext];
 
+# Amb gating variables
 u₀ = rand(11); u₀[1] = u₀[1]*25
-tspan = (0,500)
+tspan = (0,1000)
 dt = 1e-4
 p[8] = 0
-@time sol = euler(hodg_hux_gates, u₀, p, tspan, dt)
-plot(sol.t[1:10:end], sol.u[1,:][1:10:end], label = "V, with gates")
+sol = euler(hodg_hux_gates, u₀, p, tspan, dt)
+fig1 = plot(sol.t[1:10:end], sol.u[1,:][1:10:end], label = "V, with gates")
 
+# Amb el HH classic
 p[8] = 0.0
 u₀₂ = vcat(u₀[1],u₀[2], u₀[10:11])
 sol2 = euler(hodg_hux_det, u₀₂, p, tspan, dt)
-plot!(sol2.t[1:100:end], sol2.u[1,:][1:100:end], "V, no gates")
+plot!(sol2.t[1:100:end], sol2.u[1,:][1:100:end], label = "V, no gates")
+
+# Gating variables
+fig2 = plot();
+for j in [6,10,11]
+    plot!(sol.t[1:100:end], sol.u[j,:][1:100:end])
+end
+
+fig3 = plot(sol2.t[1:100:end], sol2.u[2,:][1:100:end].^4);
+       plot!(sol2.t[1:100:end], sol2.u[3,:][1:100:end].^3);
+       plot!(sol2.t[1:100:end], sol2.u[4,:][1:100:end]);
+
+plot(fig1, fig2, fig3, layout = (3,1))

@@ -1,4 +1,4 @@
-using DifferentialEquations, Plots, StaticArrays
+@time using DifferentialEquations, Plots, StaticArrays
 
 # Potassium (n) and sodium (m,h) ion-channel rate functions
 
@@ -104,12 +104,12 @@ u₀ = @SVector rand(11)
 tspan = (0, 1000);
 
 # Integration
-prob = ODEProblem(hodg_hux_gates, u₀, tspan, p, dtmax = 0.01);
-sol = solve(prob, saveat = 0.1)#, callback = step_current);
+prob = ODEProblem(hodg_hux_gates, u₀, tspan, p, dtmax = 0.001)
+sol = solve(prob, saveat = 0.1, callback = step_current)
 
 p[8] = 0.0
 u₀₂ = SVector{4,Float64}(vcat(u₀[1],u₀[2], u₀[10:11]))
-prob2 = ODEProblem(hodg_hux_det,u₀₂, tspan, p,  dtmax = 0.01);
+prob2 = ODEProblem(hodg_hux_det,u₀₂, tspan, p,  dtmax = 0.01)
 sol2 = solve(prob2, saveat = 0.1, callback = step_current);
 #figures
 fig1 = plot(
