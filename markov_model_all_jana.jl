@@ -110,26 +110,27 @@ m0=m0/sum(m0);
 u₀ = SVector{11}(vcat(rand(),n0, m0,h0))
 tspan = (0, 1000);
 
-# Integration
+# Integration (states)
 prob = ODEProblem(hodg_hux_gates, u₀, tspan, p, dtmax = 0.001)
 sol = solve(prob, saveat = 0.1, callback = step_current)
-
 p[8] = 0.0
+
+#Integration (hh)
 u₀₂ = SVector{4,Float64}(vcat(u₀[1],u₀[2], u₀[10:11]))
 prob2 = ODEProblem(hodg_hux_det,u₀₂, tspan, p,  dtmax = 0.01)
 sol2 = solve(prob2, saveat = 0.1, callback = step_current);
 #figures
 fig1 = plot(
     sol.t, sol[1, :],
-    title = "Time series of voltage, gates",
+    title = "Time series of voltage",
     xlabel = "t (ms)",
     ylabel = "V (mV)",
     linewidth = 1,
-    label = "V, amb eqs. gates",
+    label = "V, amb rate eqs.",
 )
 plot!(
     sol2.t, sol2[1, :],
-    title = "Time series of voltage, gates",
+    title = "Time series of voltage",
     xlabel = "t (ms)",
     ylabel = "V (mV)",
     linewidth = 1,
@@ -137,11 +138,16 @@ plot!(
 )
 
 # n₄, m₃, h
-fig2 = plot(sol, idxs = (0,[6,10,11]))
+fig2 = plot(sol.t,sol[6,:],label="n4")
+plot!(sol.t,sol[10,:],label="m3")
+plot!(sol.t,sol[11,:],label="h")
+plot!(title="Gating variables")
 
 # n⁴, m³, h
-fig3 = plot(sol2.t, sol2[2,:].^4);
-    plot!(sol2.t, sol2[3,:].^3);
-    plot!(sol2.t, sol2[4,:]);
+fig3 = plot(sol2.t, sol2[2,:].^4,label="n⁴");
+    plot!(sol2.t, sol2[3,:].^3,label="m³");
+    plot!(sol2.t, sol2[4,:],label="h");
 
-plot(fig2, fig3, layout = (2,1))
+fig_tot=plot(fig2, fig3, layout = (2,1))
+savefig(fig_tot, "gating_variables")
+savefig(fig1, "voltatge")
