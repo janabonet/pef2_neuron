@@ -1,4 +1,4 @@
-@time using DifferentialEquations, Plots, StaticArrays
+@time using DifferentialEquations, Plots, StaticArrays, LinearAlgebra
 
 # Potassium (n) and sodium (m,h) ion-channel rate functions
 
@@ -97,10 +97,17 @@ n_inf(v) = αₙ(v) / (αₙ(v) + βₙ(v));
 m_inf(v) = αₘ(v) / (αₘ(v) + βₘ(v));
 h_inf(v) = αₕ(v) / (αₕ(v) + βₕ(v));
 v₀ = -60;
-u₀ = @SVector [v₀, n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), h_inf(v₀)]
+u₀ = @SVector [v₀, n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), h_inf(v₀)];
 
 p[8] = 0.0
+
 u₀ = @SVector rand(11)
+n0 = rand(5)
+m0 = rand(4)
+h0 = rand()
+n0=n0/sum(n0);
+m0=m0/sum(m0);
+u₀ = SVector{11}(vcat(rand(),n0, m0,h0))
 tspan = (0, 1000);
 
 # Integration
@@ -138,3 +145,6 @@ fig3 = plot(sol2.t, sol2[2,:].^4);
     plot!(sol2.t, sol2[4,:]);
 
 plot(fig2, fig3, layout = (2,1))
+
+m_tot = sol[7,:]+ sol[8,:]+sol[9,:] +sol[10,:]
+plot(sol.t, m_tot)
