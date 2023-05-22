@@ -1,4 +1,4 @@
-using Plots, Distributions, LoopVectorization
+using Plots, Distributions
 
 # Parametres per Hodgkin Huxley
 const V_na = 55.0;
@@ -58,29 +58,45 @@ function hh_gates_simulation(N_tot, dt,t_tot, p)
         a₁ = [rand(Poisson(p₁_i*dt)) for p₁_i in p₁];
         a₂ = [rand(Poisson(p₂_i*dt)) for p₂_i in p₂];
 
-        N_o[:,i] = N_o[i-1] .+ (a₂-a₁)
-        N_c[:,i] = N_c[i-1] .+ (a₁-a₂)
+        N_o[:,i] = N_o[:,i-1] + (a₂-a₁); 
+        N_c[:,i] = N_c[:,i-1] + (a₁-a₂); 
 
-        # N_o = [n_oberts ; m_oberts; h_oberts]
-        I_na =  g_na * (N_o[2,i]/N_tot)^3 * N_o[3,i]/N_tot * (V[i-1] - V_na)
-        I_k  =  g_k * (N_o[1,i]/N_tot)^4 * (V[i-1] - V_k)
+        # Assegurar que no hi ha estats impossibles
+        for j in 1:3
+            if N_o[j,i] < 0
+                N_o[j,i] = 0 
+                N_c[j,i] = N_tot
+            elseif N_o[j,i] > N_tot 
+                N_o[j,i] = N_tot
+                N_c[j,i] = 0
+            elseif N_c[j,i] < 0 
+                N_o[j,i] = N_tot
+                N_c[j,i] = 0
+            elseif N_c[j,i] > N_tot 
+                N_o[j,i] = 0
+                N_c[j,i] = N_tot
+            end
+        end
+        I_na =  g_na * (N_o[2,i-1]/N_tot)^3 * (N_o[3,i-1]/N_tot) * (V[i-1] - V_na)
+        I_k  =  g_k * (N_o[1,i-1]/N_tot)^4 * (V[i-1] - V_k)
         I_l  =  g_l * (V[i-1] - V_l)
+        V[i] = V[i-1] + dt *(1/C * (I_ext -I_na - I_k - I_l))
     end
     return solution(collect(0:dt:t_tot),V,N_o,N_c)
 end
 
 # Parametres simulacio
-N_tot = 1000; # Nombre total de canals
-dt = 1e-3;   # time steps
+N_tot = 1e4; # Nombre total de canals
+dt = 0.5e-3;   # time steps
 t_tot = 1000; # temps final
 
 # Simulacio
 sol = hh_gates_simulation(N_tot, dt,t_tot, p)
-
+myrange = 1:10:Int(round(t_tot/dt));
 # Gràfiques
-fig1 = plot(sol.t,sol.V, label = "V"; xlabel = "t", ylabel = "V")
-fig2 = plot(sol.t,(sol.N_o[1,:]/N_tot).^4, label = "n⁴", xlabel = "T")
-       plot!(sol.t,(sol.N_o[2,:]/N_tot).^3, label = "m³")
-       plot!(sol.t,sol.N_o[3,:]/N_tot, label = "h")
+fig1 = plot(sol.t[myrange],sol.V[myrange], label = "V"; xlabel = "t", ylabel = "V")
+fig2 = plot(sol.t[myrange],(sol.N_o[1,myrange]/N_tot).^4, label = "n⁴", xlabel = "T")
+       plot!(sol.t[myrange],(sol.N_o[2,myrange]/N_tot).^3, label = "m³")
+       plot!(sol.t[myrange],sol.N_o[3,myrange]/N_tot, label = "h")
 
 plot(fig1,fig2, layout = (2,1))

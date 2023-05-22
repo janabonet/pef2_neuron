@@ -30,6 +30,7 @@ for i in 2:length(0:dt:t_tot)
         N_c[i] = 0; println("N_c < 0"*string(i*dt))
     elseif N_c[i] > N_tot 
         N_c[i] = N_tot
+    end
 end
 
 fig = plot((0:dt:t_tot), N_o, markersize = 1.5, markerstrokewidth = 0, label = "N_o", xlabel = "t", ylabel = "# of Gates")
