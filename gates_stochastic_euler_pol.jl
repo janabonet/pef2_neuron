@@ -31,8 +31,8 @@ end
 struct solution
     t::Vector{Float64}
     V::Vector{Float64}
-    N_o::Matrix{Int64}
-    N_c::Matrix{Int64}
+    N_o::Matrix{Float64}
+    N_c::Matrix{Float64}
 end
 
 # Function to simulate 
@@ -42,8 +42,8 @@ function hh_gates_simulation(N_tot, dt,t_tot, p)
 
     # Inicialitzar vectors
     V = zeros(total_steps)
-    N_o = zeros(Int64,3,total_steps)
-    N_c = zeros(Int64,3,total_steps)
+    N_o = zeros(Float64,3,total_steps)
+    N_c = zeros(Float64,3,total_steps)
 
     # Condicions inicials
     V[1] = rand()
@@ -55,9 +55,11 @@ function hh_gates_simulation(N_tot, dt,t_tot, p)
         p₁ = α(V[i-1]).*N_o[:,i-1]
         p₂ = β(V[i-1]).*N_c[:,i-1] 
 
-        a₁ = [rand(Poisson(p₁_i*dt)) for p₁_i in p₁];
-        a₂ = [rand(Poisson(p₂_i*dt)) for p₂_i in p₂];
-
+        # a₁ = [rand(Poisson(p₁_i*dt)) for p₁_i in p₁];
+        # a₂ = [rand(Poisson(p₂_i*dt)) for p₂_i in p₂];
+        a₁ = ([p₁_i*dt for p₁_i in p₁]);
+        a₂ = ([p₂_i*dt for p₂_i in p₂]);
+        
         N_o[:,i] = N_o[:,i-1] + (a₂-a₁); 
         N_c[:,i] = N_c[:,i-1] + (a₁-a₂); 
 
@@ -99,4 +101,5 @@ fig2 = plot(sol.t[myrange],(sol.N_o[1,myrange]/N_tot).^4, label = "n⁴", xlabel
        plot!(sol.t[myrange],(sol.N_o[2,myrange]/N_tot).^3, label = "m³")
        plot!(sol.t[myrange],sol.N_o[3,myrange]/N_tot, label = "h")
 
-plot(fig1,fig2, layout = (2,1))
+fig3 = plot(fig1,fig2, layout = (2,1))
+savefig(fig3,"sense_soroll")
