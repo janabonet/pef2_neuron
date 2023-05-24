@@ -65,85 +65,106 @@ function channel_states_euler(N_tot, dt, t_tot, p)
 
     for i in 2:Int(100/dt)
         # Differential equation system
-        dN_n₀ = -4*αₙ(V[i-1])*N0[i-1] + βₙ(V[i-1])*N1[i-1]
-        dN_n₁ = -(3*αₙ(V[i-1]) + βₙ(V[i-1]))*N1[i-1] + 4*αₙ(V[i-1])*N0[i-1] + 2*βₙ(V[i-1])*N2[i-1]
-        dN_n₂ = -(2*αₙ(V[i-1]) + 2*βₙ(V[i-1]))*N2[i-1] + 3*αₙ(V[i-1])*N1[i-1] + 3*βₙ(V[i-1])*N3[i-1]
-        dN_n₃ = -(αₙ(V[i-1])+3*βₙ(V[i-1]))*N3[i-1] + 2*αₙ(V[i-1])*N2[i-1] + 4*βₙ(V[i-1])*N4[i-1]
-        dN_n₄ = -4*βₙ(V[i-1])*N4[i-1] + αₙ(V[i-1])*N3[i-1]
+        # dN_n₀ = -4*αₙ(V[i-1])*N0[i-1] + βₙ(V[i-1])*N1[i-1]
+        # dN_n₁ = -(3*αₙ(V[i-1]) + βₙ(V[i-1]))*N1[i-1] + 4*αₙ(V[i-1])*N0[i-1] + 2*βₙ(V[i-1])*N2[i-1]
+        # dN_n₂ = -(2*αₙ(V[i-1]) + 2*βₙ(V[i-1]))*N2[i-1] + 3*αₙ(V[i-1])*N1[i-1] + 3*βₙ(V[i-1])*N3[i-1]
+        # dN_n₃ = -(αₙ(V[i-1])+3*βₙ(V[i-1]))*N3[i-1] + 2*αₙ(V[i-1])*N2[i-1] + 4*βₙ(V[i-1])*N4[i-1]
+        # dN_n₄ = -4*βₙ(V[i-1])*N4[i-1] + αₙ(V[i-1])*N3[i-1]
         
-        dN_m₀ = -3*αₘ(V[i-1])*M0[i-1] + βₘ(V[i-1])*M1[i-1]
-        dN_m₁ = -(2*αₘ(V[i-1]) + βₘ(V[i-1]))*M1[i-1] + 3*αₘ(V[i-1])*M0[i-1] + 2*βₘ(V[i-1])*M2[i-1]
-        dN_m₂ = -(αₘ(V[i-1]) + 2*βₘ(V[i-1]))*M2[i-1] + 2*αₘ(V[i-1])*M1[i-1] + 3*βₘ(V[i-1])*M3[i-1]
-        dN_m₃ = -3*βₘ(V[i-1])*M3[i-1] + αₘ(V[i-1])*M2[i-1]
+        # dN_m₀ = -3*αₘ(V[i-1])*M0[i-1] + βₘ(V[i-1])*M1[i-1]
+        # dN_m₁ = -(2*αₘ(V[i-1]) + βₘ(V[i-1]))*M1[i-1] + 3*αₘ(V[i-1])*M0[i-1] + 2*βₘ(V[i-1])*M2[i-1]
+        # dN_m₂ = -(αₘ(V[i-1]) + 2*βₘ(V[i-1]))*M2[i-1] + 2*αₘ(V[i-1])*M1[i-1] + 3*βₘ(V[i-1])*M3[i-1]
+        # dN_m₃ = -3*βₘ(V[i-1])*M3[i-1] + αₘ(V[i-1])*M2[i-1]
 
-        dN_h = αₕ(V[i-1])*(N_tot .- H[i-1]) - βₕ(V[i-1])*H[i-1]
+        # dN_h = αₕ(V[i-1])*(N_tot .- H[i-1]) - βₕ(V[i-1])*H[i-1]
+ 
+        # Evolucio canals 
+        N0[i] = N0[i-1] + rand(Poisson(βₙ(V[i-1])*N1[i-1]*dt)) - rand(Poisson(4*αₙ(V[i-1])*N0[i-1]*dt)) 
+        N1[i] = N1[i-1] + rand(Poisson((4*αₙ(V[i-1])*N0[i-1] + 2*βₙ(V[i-1])*N2[i-1])*dt)) - rand(Poisson(((3*αₙ(V[i-1]) + βₙ(V[i-1]))*N1[i-1])*dt))
+        N2[i] = N2[i-1] + rand(Poisson((3*αₙ(V[i-1])*N1[i-1] + 3*βₙ(V[i-1])*N3[i-1])*dt)) - rand(Poisson((2*αₙ(V[i-1]) + 2*βₙ(V[i-1]))*N2[i-1]*dt))
+        N3[i] = N3[i-1] + rand(Poisson((2*αₙ(V[i-1])*N2[i-1] + 4*βₙ(V[i-1])*N4[i-1])*dt)) - rand(Poisson((αₙ(V[i-1]) + 3*βₙ(V[i-1]))*N3[i-1]*dt))
+        N4[i] = N4[i-1] + rand(Poisson(αₙ(V[i-1])*N3[i-1]*dt)) - rand(Poisson((4*βₙ(V[i-1])*N4[i-1])*dt))
+        
+        M0[i] = M0[i-1] + rand(Poisson((βₘ(V[i-1])*M1[i-1])*dt)) - rand(Poisson((3*αₘ(V[i-1])*M0[i-1])*dt))
+        M1[i] = M1[i-1] + rand(Poisson((3*αₘ(V[i-1])*M0[i-1] + 2*βₘ(V[i-1])*M2[i-1])*dt)) - rand(Poisson(((2*αₘ(V[i-1]) + βₘ(V[i-1]))*M1[i-1])*dt))
+        M2[i] = M2[i-1] + rand(Poisson((2*αₘ(V[i-1])*M1[i-1] + 3*βₘ(V[i-1])*M3[i-1])*dt)) - rand(Poisson(((αₘ(V[i-1]) + 2*βₘ(V[i-1]))*M2[i-1])*dt))
+        M3[i] = M3[i-1] + rand(Poisson((αₘ(V[i-1])*M2[i-1])*dt)) - rand(Poisson((3*βₘ(V[i-1])*M3[i-1])*dt))
+    
+        H[i] = H[i-1] + rand(Poisson((αₕ(V[i-1])*(N_tot .- H[i-1]))*dt)) - rand(Poisson((βₕ(V[i-1])*H[i-1])*dt))
 
         # Evitem que hi hagi estats sense sentit físic
+        if N0[i] > N_tot
+            N0[i]=N_tot
+            N1[i]=0;
+            N2[i]=0;
+            N3[i]=0;
+            N4[i]=0;
+        # elseif N0[i] < 0
+        #     N0[i]=0;
+        end
+        if N1[i] > N_tot
+            N1[i]=N_tot
+            N0[i]=0;
+            N2[i]=0;
+            N3[i]=0;
+            N4[i]=0;
+        end
+        if N2[i]>N_tot
+            N2[i]=N_tot
+            N0[i]=0;
+            N1[i]=0;
+            N3[i]=0;
+            N4[i]=0;
+        end
 
-        # if dN_n₀ < 0
-        #     dN_n₀=0;
-        #     elseif dN_n₀ > N_tot
-        #         dN_n₀=N_tot
-        # end
-        # if dN_n₁ < 0
-        #     dN_n₁=0;
-        #     elseif dN_n₁ > N_tot
-        #         dN_n₁=N_tot
-        # end
-        # if dN_n₂ < 0
-        #     dN_n₂=0;
-        #     elseif dN_n₂ > N_tot
-        #         dN_n₂=N_tot
-        # end
-        # if dN_n₃ < 0
-        #     dN_n₃=0;
-        #     elseif dN_n₃ > N_tot
-        #         dN_n₃=N_tot
-        # end
-        # if dN_n₄ < 0
-        #     dN_n₄=0;
-        #     elseif dN_n₄ > N_tot
-        #         dN_n₄=N_tot
-        # end
-        # if dN_m₀ < 0
-        #     dN_m₀=0;
-        #     elseif dN_m₀ > N_tot
-        #         dN_m₀=N_tot
-        # end
-        # if dN_m₁ < 0
-        #     dN_m₁=0;
-        #     elseif dN_m₁ > N_tot
-        #         dN_m₁=N_tot
-        # end
-        # if dN_m₂ < 0
-        #     dN_m₂=0;
-        #     elseif dN_m₂ > N_tot
-        #         dN_m₂=N_tot
-        # end
-        # if dN_m₃ < 0
-        #     dN_m₃=0;
-        #     elseif dN_m₃ > N_tot
-        #         dN_m₃=N_tot
-        # end
-        # if dN_h < 0
-        #     dN_h=0;
-        #     elseif dN_h > N_tot
-        #         dN_h=N_tot
-        # end
+        if N3[i] > N_tot
+            N3[i]=N_tot
+            N0[i]=0;
+            N1[i]=0;
+            N2[i]=0;
+        end
 
-        # Evolucio canals 
-        N0[i] = N0[i-1] + rand(Poisson(dN_n₀*dt))
-        N1[i] = N1[i-1] + rand(Poisson(dN_n₁*dt))
-        N2[i] = N2[i-1] + rand(Poisson(dN_n₂*dt))
-        N3[i] = N3[i-1] + rand(Poisson(dN_n₃*dt))
-        N4[i] = N4[i-1] + rand(Poisson(dN_n₄*dt))
-        
-        M0[i] = M0[i-1] + rand(Poisson(dN_m₀*dt))
-        M1[i] = M1[i-1] + rand(Poisson(dN_m₁*dt))
-        M2[i] = M2[i-1] + rand(Poisson(dN_m₂*dt))
-        M3[i] = M3[i-1] + rand(Poisson(dN_m₃*dt))
-    
-        H[i] = H[i-1] + rand(Poisson(dN_h*dt))
+        if N4[i] > N_tot
+            N4[i]=N_tot
+            N0[i]=0;
+            N1[i]=0;
+            N2[i]=0;
+        end
+
+        if M0[i] > N_tot
+            M0[i]=N_tot
+            M1[i]=0;
+            M2[i]=0;
+            M3[i]=0;
+        end
+
+        if M1[i] > N_tot
+            M1[i]=N_tot
+            M0[i]=0;
+            M2[i]=0;
+            M3[i]=0;
+        end
+
+        if M2[i] > N_tot
+            M2[i]=N_tot
+            M0[i]=0;
+            M1[i]=0;
+            M3[i]=0;
+        end
+
+        if M3[i] > N_tot
+            M3[i]=N_tot
+            M0[i]=0;
+            M1[i]=0;
+            M2[i]=0;
+        end
+
+
+        if H[i] < 0
+            H[i]=0;
+            elseif H[i] > N_tot
+            H[i]=N_tot
+        end
 
         # Evolucio temporal dels corrents
         I_na = g_na * M3[i-1]/N_tot * H[i-1] * (V[i-1] - V_na)
@@ -153,11 +174,12 @@ function channel_states_euler(N_tot, dt, t_tot, p)
         # ODE system
         V[i] = V[i-1] + dt *  1 / C * (I_ext - I_na - I_k - I_l)
     end
+
     return solution(collect(0:dt:t_tot),V,N4,M3,H)
 end
 
 N_tot = 1e4;
-dt = 1e-3;
+dt = 1e-4;
 t_tot = 1000;
 
 sol = channel_states_euler(N_tot, dt, t_tot, p);
