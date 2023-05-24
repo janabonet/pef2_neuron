@@ -27,6 +27,7 @@ function β(V)
     ]
 end
 
+
 # Struct to have solution in a concise form
 struct solution
     t::Vector{Float64}
@@ -47,24 +48,18 @@ function hh_gates_simulation(N_tot, dt,t_tot, p)
 
     # Condicions inicials
     V[1] = rand()
-    N_o[:,1] = round.(N_tot*rand(3))
-    N_c[:,1] = N_tot .- N_o[:,1]
+    N_o[:,1] = (N_tot*rand(3))
 
     # Evolucio temporal
     for i in 2:total_steps
-        # p₁ = α(V[i-1]).*N_o[:,i-1]
-        # p₂ = β(V[i-1]).*N_c[:,i-1] 
+        p₁ = β(V[i-1]).*N_o[:,i-1]
+        p₂ = α(V[i-1]).*(N_tot .- N_o[:,i-1])
 
-        # a₁ = [rand(Poisson(p₁_i*dt)) for p₁_i in p₁];
-        # a₂ = [rand(Poisson(p₂_i*dt)) for p₂_i in p₂];
+        a₁ = [rand(Poisson(p₁_i*dt)) for p₁_i in p₁];
+        a₂ = [rand(Poisson(p₂_i*dt)) for p₂_i in p₂];
         
-        # a₁ = [p₁_i*dt for p₁_i in p₁]
-        # a₂ = [p₂_i*dt for p₂_i in p₂]
-        # N_o[:,i] = N_o[:,i-1] + (a₂-a₁); 
-        # N_c[:,i] = N_c[:,i-1] + (a₁-a₂); 
-
-
-        N_o[:,i] = N_o[:,i-1] + dt*(-α(V[i-1]).*N_o[:,i-1] + β(V[i-1]).*(N_tot.-N_o[:,i-1]))
+        N_o[:,i] = N_o[:,i-1] + (a₂-a₁); 
+        # N_o[:,i] = N_o[:,i-1] + dt*(-β(V[i-1]).*N_o[:,i-1] + α(V[i-1]).*(N_tot.-N_o[:,i-1]))
         # Assegurar que no hi ha estats impossibles
         for j in 1:3
             if N_o[j,i] < 0
@@ -95,7 +90,7 @@ function hh_gates_simulation(N_tot, dt,t_tot, p)
 end
 
 # Parametres simulacio
-N_tot = 1e4; # Nombre total de canals
+N_tot = 1e3; # Nombre total de canals
 dt = 0.5e-3;   # time steps
 t_tot = 1000; # temps final
 
