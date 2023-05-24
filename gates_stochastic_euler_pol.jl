@@ -48,21 +48,23 @@ function hh_gates_simulation(N_tot, dt,t_tot, p)
     # Condicions inicials
     V[1] = rand()
     N_o[:,1] = round.(N_tot*rand(3))
-    @. N_c[:,1] = N_tot - N_o[:,1]
+    N_c[:,1] = N_tot .- N_o[:,1]
 
     # Evolucio temporal
     for i in 2:total_steps
-        p₁ = α(V[i-1]).*N_o[:,i-1]
-        p₂ = β(V[i-1]).*N_c[:,i-1] 
+        # p₁ = α(V[i-1]).*N_o[:,i-1]
+        # p₂ = β(V[i-1]).*N_c[:,i-1] 
 
         # a₁ = [rand(Poisson(p₁_i*dt)) for p₁_i in p₁];
         # a₂ = [rand(Poisson(p₂_i*dt)) for p₂_i in p₂];
-        a₁ = ([p₁_i*dt for p₁_i in p₁]);
-        a₂ = ([p₂_i*dt for p₂_i in p₂]);
         
-        N_o[:,i] = N_o[:,i-1] + (a₂-a₁); 
-        N_c[:,i] = N_c[:,i-1] + (a₁-a₂); 
+        # a₁ = [p₁_i*dt for p₁_i in p₁]
+        # a₂ = [p₂_i*dt for p₂_i in p₂]
+        # N_o[:,i] = N_o[:,i-1] + (a₂-a₁); 
+        # N_c[:,i] = N_c[:,i-1] + (a₁-a₂); 
 
+
+        N_o[:,i] = N_o[:,i-1] + dt*(-α(V[i-1]).*N_o[:,i-1] + β(V[i-1]).*(N_tot.-N_o[:,i-1]))
         # Assegurar que no hi ha estats impossibles
         for j in 1:3
             if N_o[j,i] < 0
@@ -79,10 +81,15 @@ function hh_gates_simulation(N_tot, dt,t_tot, p)
                 N_c[j,i] = N_tot
             end
         end
+
+        # Corrents
         I_na =  g_na * (N_o[2,i-1]/N_tot)^3 * (N_o[3,i-1]/N_tot) * (V[i-1] - V_na)
         I_k  =  g_k * (N_o[1,i-1]/N_tot)^4 * (V[i-1] - V_k)
         I_l  =  g_l * (V[i-1] - V_l)
+
+        # Evolucio de potencial, mitjançant euler
         V[i] = V[i-1] + dt *(1/C * (I_ext -I_na - I_k - I_l))
+
     end
     return solution(collect(0:dt:t_tot),V,N_o,N_c)
 end
