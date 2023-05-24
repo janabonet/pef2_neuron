@@ -61,36 +61,49 @@ function channel_states_euler(N_tot, dt, t_tot, p)
     M1[1] = m0[2]
     M2[1] = m0[3]
     M3[1] = m0[4]
-    H[1] = rand()*1
+    H[1] = rand()*N_tot
 
     for i in 2:Int(100/dt)
         # Differential equation system
-        dN_n₀ = -4*αₙ(V[i-1])*N0[i-1] + βₙ(V[i-1])*N1[i-1]
-        dN_n₁ = -(3*αₙ(V[i-1]) + βₙ(V[i-1]))*N1[i-1] + 4*αₙ(V[i-1])*N0[i-1] + 2*βₙ(V[i-1])*N2[i-1]
-        dN_n₂ = -(2*αₙ(V[i-1]) + 2*βₙ(V[i-1]))*N2[i-1] + 3*αₙ(V[i-1])*N1[i-1] + 3*βₙ(V[i-1])*N3[i-1]
-        dN_n₃ = -(αₙ(V[i-1])+3*βₙ(V[i-1]))*N3[i-1] + 2*αₙ(V[i-1])*N2[i-1] + 4*βₙ(V[i-1])*N4[i-1]
-        dN_n₄ = -4*βₙ(V[i-1])*N4[i-1] + αₙ(V[i-1])*N3[i-1]
+        # dN_n₀ = -4*αₙ(V[i-1])*N0[i-1] + βₙ(V[i-1])*N1[i-1]
+        # dN_n₁ = -(3*αₙ(V[i-1]) + βₙ(V[i-1]))*N1[i-1] + 4*αₙ(V[i-1])*N0[i-1] + 2*βₙ(V[i-1])*N2[i-1]
+        # dN_n₂ = -(2*αₙ(V[i-1]) + 2*βₙ(V[i-1]))*N2[i-1] + 3*αₙ(V[i-1])*N1[i-1] + 3*βₙ(V[i-1])*N3[i-1]
+        # dN_n₃ = -(αₙ(V[i-1])+3*βₙ(V[i-1]))*N3[i-1] + 2*αₙ(V[i-1])*N2[i-1] + 4*βₙ(V[i-1])*N4[i-1]
+        # dN_n₄ = -4*βₙ(V[i-1])*N4[i-1] + αₙ(V[i-1])*N3[i-1]
         
-        dN_m₀ = -3*αₘ(V[i-1])*M0[i-1] + βₘ(V[i-1])*M1[i-1]
-        dN_m₁ = -(2*αₘ(V[i-1]) + βₘ(V[i-1]))*M1[i-1] + 3*αₘ(V[i-1])*M0[i-1] + 2*βₘ(V[i-1])*M2[i-1]
-        dN_m₂ = -(αₘ(V[i-1]) + 2*βₘ(V[i-1]))*M2[i-1] + 2*αₘ(V[i-1])*M1[i-1] + 3*βₘ(V[i-1])*M3[i-1]
-        dN_m₃ = -3*βₘ(V[i-1])*M3[i-1] + αₘ(V[i-1])*M2[i-1]
+        # dN_m₀ = -3*αₘ(V[i-1])*M0[i-1] + βₘ(V[i-1])*M1[i-1]
+        # dN_m₁ = -(2*αₘ(V[i-1]) + βₘ(V[i-1]))*M1[i-1] + 3*αₘ(V[i-1])*M0[i-1] + 2*βₘ(V[i-1])*M2[i-1]
+        # dN_m₂ = -(αₘ(V[i-1]) + 2*βₘ(V[i-1]))*M2[i-1] + 2*αₘ(V[i-1])*M1[i-1] + 3*βₘ(V[i-1])*M3[i-1]
+        # dN_m₃ = -3*βₘ(V[i-1])*M3[i-1] + αₘ(V[i-1])*M2[i-1]
 
-        dN_h = αₕ(V[i-1])*(N_tot .- H[i-1]) - βₕ(V[i-1])*H[i-1]
+        # dN_h = αₕ(V[i-1])*(N_tot .- H[i-1]) - βₕ(V[i-1])*H[i-1]
 
         # Evolucio canals 
-        N0[i] = N0[i-1] + rand(Poisson(dN_n₀*dt))
-        N1[i] = N1[i-1] + rand(Poisson(dN_n₁*dt))
-        N2[i] = N2[i-1] + rand(Poisson(dN_n₂*dt))
-        N3[i] = N3[i-1] + rand(Poisson(dN_n₃*dt))
-        N4[i] = N4[i-1] + rand(Poisson(dN_n₄*dt))
+        # N0[i] = N0[i-1] + dN_n₀*dt
+        # N1[i] = N1[i-1] + dN_n₁*dt
+        # N2[i] = N2[i-1] + dN_n₂*dt
+        # N3[i] = N3[i-1] + dN_n₃*dt
+        # N4[i] = N4[i-1] + dN_n₄*dt
         
-        M0[i] = M0[i-1] + rand(Poisson(dN_m₀*dt))
-        M1[i] = M1[i-1] + rand(Poisson(dN_m₁*dt))
-        M2[i] = M2[i-1] + rand(Poisson(dN_m₂*dt))
-        M3[i] = M3[i-1] + rand(Poisson(dN_m₃*dt))
+        # M0[i] = M0[i-1] + dN_m₀*dt
+        # M1[i] = M1[i-1] + dN_m₁*dt
+        # M2[i] = M2[i-1] + dN_m₂*dt
+        # M3[i] = M3[i-1] + dN_m₃*dt
     
-        H[i] = H[i-1] + rand(Poisson(dN_h*dt))
+        # H[i] = H[i-1] + rand(Poisson(dN_h*dt))
+
+        N0[i] = N0[i-1] + rand(Poisson(βₙ(V[i-1])*N1[i-1]*dt)) - rand(Poisson(4*αₙ(V[i-1])*N0[i-1]*dt)) 
+        N1[i] = N1[i-1] + rand(Poisson(4*αₙ(V[i-1])*N0[i-1])) + rand(Poisson(2*βₙ(V[i-1])*N2[i-1]*dt)) - rand(Poisson(3*αₙ(V[i-1])*N1[i-1]*dt)) + rand(Poisson(βₙ(V[i-1])*N1[i-1]*dt))
+        N2[i] = N2[i-1] + rand(Poisson(3*αₙ(V[i-1])*N1[i-1]*dt)) + rand(Poisson(3*βₙ(V[i-1])*N3[i-1]*dt)) - rand(Poisson(2*αₙ(V[i-1])*N2[i-1]*dt)) + rand(Poisson(2*βₙ(V[i-1])*N2[i-1]*dt))
+        N3[i] = N3[i-1] + rand(Poisson(2*αₙ(V[i-1])*N2[i-1]*dt)) + rand(Poisson(4*βₙ(V[i-1])*N4[i-1]*dt)) - rand(Poisson(αₙ(V[i-1])*N3[i-1]*dt)) + rand(Poisson(3*βₙ(V[i-1])*N3[i-1]*dt))
+        N4[i] = N4[i-1] + rand(Poisson(αₙ(V[i-1])*N3[i-1]*dt)) - rand(Poisson((4*βₙ(V[i-1])*N4[i-1])*dt))
+        
+        M0[i] = M0[i-1] + rand(Poisson(βₘ(V[i-1])*M1[i-1]*dt)) - rand(Poisson(3*αₘ(V[i-1])*M0[i-1]*dt))
+        M1[i] = M1[i-1] + rand(Poisson(3*αₘ(V[i-1])*M0[i-1]*dt)) + rand(Poisson(2*βₘ(V[i-1])*M2[i-1]*dt)) - rand(Poisson(2*αₘ(V[i-1])*M1[i-1]*dt))  + rand(Poisson(βₘ(V[i-1])*M1[i-1]*dt))
+        M2[i] = M2[i-1] + rand(Poisson(2*αₘ(V[i-1])*M1[i-1])) + rand(Poisson(3*βₘ(V[i-1])*M3[i-1]*dt)) - rand(Poisson(αₘ(V[i-1])*M2[i-1]*dt)) + rand(Poisson(2*βₘ(V[i-1])*M2[i-1]*dt))
+        M3[i] = M3[i-1] + rand(Poisson((αₘ(V[i-1])*M2[i-1])*dt)) - rand(Poisson((3*βₘ(V[i-1])*M3[i-1])*dt))
+    
+        H[i] = H[i-1] + rand(Poisson((αₕ(V[i-1])*(N_tot .- H[i-1]))*dt)) - rand(Poisson((βₕ(V[i-1])*H[i-1])*dt))
 
 
         # Evolucio temporal dels corrents
