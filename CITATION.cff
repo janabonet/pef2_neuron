@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+title: Pef2 - Stochastic modeling of a neuron.
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Jana
+    family-names: Bonet Fernández
+    email: jana.liu.bonet@estudiantat.upc.edu
+  - given-names: Pol
+    family-names: Floriach de Torres
+    email: pol.floriach@estudiantat.upc.edu
+repository-code: 'https://github.com/janabonet/pef2_neuron'
+license: MIT
