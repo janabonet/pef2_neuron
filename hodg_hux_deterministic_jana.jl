@@ -64,10 +64,8 @@ u₀ = rand(4)
 tspan = (0,1000);
 
 # Integration
-prob = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01);
-sol = solve(prob, saveat = 0.1, callback = step_current);
-
-
+prob_det = ODEProblem(hodg_hux_det,u₀, tspan, p,  dtmax = 0.01);
+sol_det = solve(prob, saveat = 0.1, callback = step_current);
 
 #figures
 plot()

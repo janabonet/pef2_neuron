@@ -1,4 +1,4 @@
-@time using DifferentialEquations, Plots, StaticArrays, LinearAlgebra
+@time using DifferentialEquations, Plots, StaticArrays, LinearAlgebra, LaTeXStrings
 
 # Potassium (n) and sodium (m,h) ion-channel rate functions
 
@@ -92,12 +92,12 @@ I_ext = 0.0;
 
 p = [V_na, V_k, V_l, g_na, g_k, g_l, C, I_ext];
 
-#Initial conditions
-n_inf(v) = αₙ(v) / (αₙ(v) + βₙ(v));
-m_inf(v) = αₘ(v) / (αₘ(v) + βₘ(v));
-h_inf(v) = αₕ(v) / (αₕ(v) + βₕ(v));
-v₀ = -60;
-u₀ = @SVector [v₀, n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), h_inf(v₀)];
+# #Initial conditions
+# n_inf(v) = αₙ(v) / (αₙ(v) + βₙ(v));
+# m_inf(v) = αₘ(v) / (αₘ(v) + βₘ(v));
+# h_inf(v) = αₕ(v) / (αₕ(v) + βₕ(v));
+# v₀ = -60;
+# u₀ = @SVector [v₀, n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), n_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), m_inf(v₀), h_inf(v₀)];
 
 p[8] = 0.0
 
@@ -122,19 +122,20 @@ sol2 = solve(prob2, saveat = 0.1, callback = step_current);
 #figures
 fig1 = plot(
     sol.t, sol[1, :],
-    title = "Time series of voltage",
-    xlabel = "t (ms)",
-    ylabel = "V (mV)",
+    title = L"Time series of voltage",
+    xlabel = L"t (ms)",
+    ylabel = L"V (mV)",
     linewidth = 1,
     label = "V, amb rate eqs.",
+    dpi=600
 )
 plot!(
     sol2.t, sol2[1, :],
-    title = "Time series of voltage",
-    xlabel = "t (ms)",
-    ylabel = "V (mV)",
+    title = L"Time\:series\:of\:voltage",
+    xlabel = L"t (ms)",
+    ylabel = L"V (mV)",
     linewidth = 1,
-    label = "V, hh original",
+    label = "V, hh original"
 )
 
 # n₄, m₃, h
@@ -150,4 +151,4 @@ fig3 = plot(sol2.t, sol2[2,:].^4,label="n⁴");
 
 fig_tot=plot(fig2, fig3, layout = (2,1))
 savefig(fig_tot, "gating_variables")
-savefig(fig1, "voltatge")
+# savefig(fig1, "voltatge")
