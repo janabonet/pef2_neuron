@@ -31,7 +31,7 @@ function channel_states_euler(N_tot, dt, t_tot, p)
     V_na, V_k, V_l, g_na, g_k, g_l, C, I_ext = p
 
     # integration Parameters
-    total_steps = Int(t_tot/dt+1);
+    total_steps = Int(round(t_tot/dt+1));
 
     # iniciar vectors
     V = zeros(total_steps)
@@ -48,10 +48,10 @@ function channel_states_euler(N_tot, dt, t_tot, p)
 
     # Initial conditions
     V[1] = rand()
-    n0 = rand(5)*N_tot
-    m0 = rand(4)*N_tot
-    n0 = n0/sum(n0);
-    m0 = m0/sum(m0);
+    n0 = rand(5)
+    m0 = rand(4)
+    n0 = round.(n0/sum(n0)*N_tot); 
+    m0 = round.(m0/sum(m0)*N_tot); 
     N0[1] = n0[1]
     N1[1] = n0[2]
     N2[1] = n0[3]
@@ -61,9 +61,9 @@ function channel_states_euler(N_tot, dt, t_tot, p)
     M1[1] = m0[2]
     M2[1] = m0[3]
     M3[1] = m0[4]
-    H[1] = rand()*N_tot
+    H[1] = round(rand()*N_tot); 
 
-    for i in 2:Int(100/dt)
+    for i in 2:total_steps
         # Differential equation system
         # dN_n₀ = -4*αₙ(V[i-1])*N0[i-1] + βₙ(V[i-1])*N1[i-1]
         # dN_n₁ = -(3*αₙ(V[i-1]) + βₙ(V[i-1]))*N1[i-1] + 4*αₙ(V[i-1])*N0[i-1] + 2*βₙ(V[i-1])*N2[i-1]
@@ -77,58 +77,128 @@ function channel_states_euler(N_tot, dt, t_tot, p)
         # dN_m₃ = -3*βₘ(V[i-1])*M3[i-1] + αₘ(V[i-1])*M2[i-1]
 
         # dN_h = αₕ(V[i-1])*(N_tot .- H[i-1]) - βₕ(V[i-1])*H[i-1]
-
+ 
         # Evolucio canals 
-        # N0[i] = N0[i-1] + dN_n₀*dt
-        # N1[i] = N1[i-1] + dN_n₁*dt
-        # N2[i] = N2[i-1] + dN_n₂*dt
-        # N3[i] = N3[i-1] + dN_n₃*dt
-        # N4[i] = N4[i-1] + dN_n₄*dt
-        
-        # M0[i] = M0[i-1] + dN_m₀*dt
-        # M1[i] = M1[i-1] + dN_m₁*dt
-        # M2[i] = M2[i-1] + dN_m₂*dt
-        # M3[i] = M3[i-1] + dN_m₃*dt
-    
-        # H[i] = H[i-1] + rand(Poisson(dN_h*dt))
+        # N0[i] = N0[i-1] + rand(Binomial(N1[i-1],βₙ(V[i-1])*N1[i-1]*dt)) - rand(Binomial(N0[i-1],4*αₙ(V[i-1])*N0[i-1]*dt)) 
+        # N1[i] = N1[i-1] + rand(Binomial(N0[i-1],4*αₙ(V[i-1])*N0[i-1]*dt)) + rand(Binomial(N2[i-1],(2*βₙ(V[i-1])*N2[i-1])*dt)) - rand(Binomial(N1[i-1],3*αₙ(V[i-1])*N1[i-1]*dt)) -rand(Binomial(N1[i-1],βₙ(V[i-1])*N1[i-1]*dt))
+        # N2[i] = N2[i-1] + rand(Binomial(N1[i-1],3*αₙ(V[i-1])*N1[i-1]*dt)) + rand(Binomial(N3[i-1],(3*βₙ(V[i-1])*N3[i-1])*dt)) - rand(Binomial(N2[i-1],2*αₙ(V[i-1])*N2[i-1]*dt)) -rand(Binomial(N2[i-1],2*βₙ(V[i-1])*N2[i-1]*dt))
+        # N3[i] = N3[i-1] + rand(Binomial(N2[i-1],2*αₙ(V[i-1])*N2[i-1]*dt)) + rand(Binomial(N4[i-1],4*βₙ(V[i-1])*N4[i-1]*dt)) - rand(Binomial(N3[i-1],αₙ(V[i-1])*N3[i-1]*dt)) - rand(Binomial(N3[i-1],3*βₙ(V[i-1])*N3[i-1]*dt))
+        # N4[i] = N4[i-1] + rand(Binomial(N3[i-1],αₙ(V[i-1])*N3[i-1]*dt)) - rand(Binomial(N4[i-1],(4*βₙ(V[i-1])*N4[i-1])*dt))
+       
+        # M0[i] = M0[i-1] + rand(Binomial(M1[i-1],βₘ(V[i-1])*M1[i-1]*dt)) - rand(Binomial(M0[i-1],(3*αₘ(V[i-1])*M0[i-1])*dt))
+        # M1[i] = M1[i-1] + rand(Binomial(M0[i-1],3*αₘ(V[i-1])*M0[i-1]*dt)) + rand(Binomial(M2[i-1],2*βₘ(V[i-1])*M2[i-1]*dt)) - rand(Binomial(M1[i-1],2*αₘ(V[i-1])*M1[i-1]*dt)) + rand(Binomial(M1[i-1],βₘ(V[i-1])*M1[i-1]*dt))
+        # M2[i] = M2[i-1] + rand(Binomial(M1[i-1],2*αₘ(V[i-1])*M1[i-1]*dt)) + rand(Binomial(M3[i-1],3*βₘ(V[i-1])*M3[i-1]*dt)) + rand(Binomial(M2[i-1],αₘ(V[i-1])*dt*M2[i-1])) + rand(Binomial(M2[i-1],2*βₘ(V[i-1])*M2[i-1]*dt))
+        # M3[i] = M3[i-1] + rand(Binomial(M2[i-1],αₘ(V[i-1])*M2[i-1]*dt)) - rand(Binomial(M3[i-1],3*βₘ(V[i-1])*M3[i-1]*dt))
 
-        N0[i] = N0[i-1] + rand(Poisson(βₙ(V[i-1])*N1[i-1]*dt)) - rand(Poisson(4*αₙ(V[i-1])*N0[i-1]*dt)) 
-        N1[i] = N1[i-1] + rand(Poisson(4*αₙ(V[i-1])*N0[i-1])) + rand(Poisson(2*βₙ(V[i-1])*N2[i-1]*dt)) - rand(Poisson(3*αₙ(V[i-1])*N1[i-1]*dt)) + rand(Poisson(βₙ(V[i-1])*N1[i-1]*dt))
-        N2[i] = N2[i-1] + rand(Poisson(3*αₙ(V[i-1])*N1[i-1]*dt)) + rand(Poisson(3*βₙ(V[i-1])*N3[i-1]*dt)) - rand(Poisson(2*αₙ(V[i-1])*N2[i-1]*dt)) + rand(Poisson(2*βₙ(V[i-1])*N2[i-1]*dt))
-        N3[i] = N3[i-1] + rand(Poisson(2*αₙ(V[i-1])*N2[i-1]*dt)) + rand(Poisson(4*βₙ(V[i-1])*N4[i-1]*dt)) - rand(Poisson(αₙ(V[i-1])*N3[i-1]*dt)) + rand(Poisson(3*βₙ(V[i-1])*N3[i-1]*dt))
-        N4[i] = N4[i-1] + rand(Poisson(αₙ(V[i-1])*N3[i-1]*dt)) - rand(Poisson((4*βₙ(V[i-1])*N4[i-1])*dt))
-        
-        M0[i] = M0[i-1] + rand(Poisson(βₘ(V[i-1])*M1[i-1]*dt)) - rand(Poisson(3*αₘ(V[i-1])*M0[i-1]*dt))
-        M1[i] = M1[i-1] + rand(Poisson(3*αₘ(V[i-1])*M0[i-1]*dt)) + rand(Poisson(2*βₘ(V[i-1])*M2[i-1]*dt)) - rand(Poisson(2*αₘ(V[i-1])*M1[i-1]*dt))  + rand(Poisson(βₘ(V[i-1])*M1[i-1]*dt))
-        M2[i] = M2[i-1] + rand(Poisson(2*αₘ(V[i-1])*M1[i-1])) + rand(Poisson(3*βₘ(V[i-1])*M3[i-1]*dt)) - rand(Poisson(αₘ(V[i-1])*M2[i-1]*dt)) + rand(Poisson(2*βₘ(V[i-1])*M2[i-1]*dt))
-        M3[i] = M3[i-1] + rand(Poisson((αₘ(V[i-1])*M2[i-1])*dt)) - rand(Poisson((3*βₘ(V[i-1])*M3[i-1])*dt))
-    
-        H[i] = H[i-1] + rand(Poisson((αₕ(V[i-1])*(N_tot .- H[i-1]))*dt)) - rand(Poisson((βₕ(V[i-1])*H[i-1])*dt))
+        # H[i] = H[i-1] + rand(Binomial(N_tot .-H[i-1],αₕ(V[i-1])*(N_tot .- H[i-1])*dt)) - rand(Binomial(H[i-1],(βₕ(V[i-1])*H[i-1])*dt))
 
+        N0[i] = N0[i-1] + rand(Binomial(N1[i-1],βₙ(V[i-1])*dt)) - rand(Binomial(N0[i-1],4*αₙ(V[i-1])*dt)) 
+        N1[i] = N1[i-1] + rand(Binomial(N0[i-1],4*αₙ(V[i-1])*dt)) + rand(Binomial(N2[i-1],2*βₙ(V[i-1])*dt)) - rand(Binomial(N1[i-1],3*αₙ(V[i-1])*dt)) -rand(Binomial(N1[i-1],βₙ(V[i-1])*dt))
+        N2[i] = N2[i-1] + rand(Binomial(N1[i-1],3*αₙ(V[i-1])*dt)) + rand(Binomial(N3[i-1],3*βₙ(V[i-1])*dt)) - rand(Binomial(N2[i-1],2*αₙ(V[i-1])*dt)) -rand(Binomial(N2[i-1],2*βₙ(V[i-1])*dt))
+        N3[i] = N3[i-1] + rand(Binomial(N2[i-1],2*αₙ(V[i-1])*dt)) + rand(Binomial(N4[i-1],4*βₙ(V[i-1])*dt)) - rand(Binomial(N3[i-1],αₙ(V[i-1])*dt)) - rand(Binomial(N3[i-1],3*βₙ(V[i-1])*dt))
+        N4[i] = N4[i-1] + rand(Binomial(N3[i-1],αₙ(V[i-1])*dt)) - rand(Binomial(N4[i-1],4*βₙ(V[i-1])*dt))
+       
+        M0[i] = M0[i-1] + rand(Binomial(M1[i-1],βₘ(V[i-1])*dt)) - rand(Binomial(M0[i-1],3*αₘ(V[i-1])*dt))
+        M1[i] = M1[i-1] + rand(Binomial(M0[i-1],3*αₘ(V[i-1])*dt)) + rand(Binomial(M2[i-1],2*βₘ(V[i-1])*dt)) - rand(Binomial(M1[i-1],2*αₘ(V[i-1])*dt)) + rand(Binomial(M1[i-1],βₘ(V[i-1])*dt))
+        M2[i] = M2[i-1] + rand(Binomial(M1[i-1],2*αₘ(V[i-1])*dt)) + rand(Binomial(M3[i-1],3*βₘ(V[i-1])*dt)) + rand(Binomial(M2[i-1],αₘ(V[i-1])*dt)) + rand(Binomial(M2[i-1],2*βₘ(V[i-1])*dt))
+        M3[i] = M3[i-1] + rand(Binomial(M2[i-1],αₘ(V[i-1])*dt)) - rand(Binomial(M3[i-1],3*βₘ(V[i-1])*dt))
+        # println(V[i-1])
+        # println((N_tot .-H[i-1], αₕ(V[i-1])*dt))
+        H[i] = H[i-1] + rand(Binomial(N_tot .-H[i-1],αₕ(V[i-1])*dt)) - rand(Binomial(H[i-1],βₕ(V[i-1])*dt))
+
+        # Evitem que hi hagi estats sense sentit físic
+        # if N0[i] > N_tot
+        #     N0[i]=N_tot
+        #     N1[i]=0;
+        #     N2[i]=0;
+        #     N3[i]=0;
+        #     N4[i]=0;
+        #     # elseif N0[i] < 0
+        #     #     N0[i]=0;
+        # end
+        # if N1[i] > N_tot
+        #     N1[i]=N_tot
+        #     N0[i]=0;
+        #     N2[i]=0;
+        #     N3[i]=0;
+        #     N4[i]=0;
+        # end
+        # if N2[i] > N_tot
+        #     N2[i]=N_tot
+        #     N0[i]=0;
+        #     N1[i]=0;
+        #     N3[i]=0;
+        #     N4[i]=0;
+        # end
+        # if N3[i] > N_tot
+        #     N3[i]=N_tot
+        #     N0[i]=0;
+        #     N1[i]=0;
+        #     N2[i]=0;
+        # end
+        # if N4[i] > N_tot
+        #     N4[i]=N_tot
+        #     N0[i]=0;
+        #     N1[i]=0;
+        #     N2[i]=0;
+        # end
+        # if M0[i] > N_tot
+        #     M0[i]=N_tot
+        #     M1[i]=0;
+        #     M2[i]=0;
+        #     M3[i]=0;
+        # end
+        # if M1[i] > N_tot
+        #     M1[i]=N_tot
+        #     M0[i]=0;
+        #     M2[i]=0;
+        #     M3[i]=0;
+        # end
+        # if M2[i] > N_tot
+        #     M2[i]=N_tot
+        #     M0[i]=0;
+        #     M1[i]=0;
+        #     M3[i]=0;
+        # end
+        # if M3[i] > N_tot
+        #     M3[i]=N_tot
+        #     M0[i]=0;
+        #     M1[i]=0;
+        #     M2[i]=0;
+        # end
+        # if H[i] < 0
+        #     H[i]=0;
+        # elseif H[i] > N_tot
+        #     H[i]=N_tot
+        # end
 
         # Evolucio temporal dels corrents
-        I_na = g_na * M3[i-1]/N_tot * H[i-1] * (V[i-1] - V_na)
-        I_k = g_k * N4[i-1]/N_tot * (V[i-1] - V_k)
-        I_l = g_l * (V[i-1] - V_l)
+        # println(i)
+        # println(M3[i-1])
+        # println(H[i-1])
+        I_na = g_na * M3[i-1]/N_tot * H[i-1]/N_tot * (V[i-1] - V_na) ; #println(I_na)
+        I_k = g_k * N4[i-1]/N_tot * (V[i-1] - V_k);# println(I_k)
+        I_l = g_l * (V[i-1] - V_l); #println(I_l)
 
         # ODE system
         V[i] = V[i-1] + dt *  1 / C * (I_ext - I_na - I_k - I_l)
+        # println(V[i])
     end
 
-#  
+    return solution(collect(0:dt:t_tot),V,N4,M3,H)
 end
 
-N_tot = 1e4
-dt = 1e-3
-t_tot = 1000
+N_tot = 5;
+dt = 1e-3;
+t_tot = 1000;
 
-sol = channel_states_euler(N_tot, dt, t_tot, p)
-
-myrange = 1:100:Int(round(t_tot/dt))
-fig1 = plot(sol.t[myrange],sol.V[myrange])
-fig2 = plot(sol.t[myrange],sol.N4[myrange])
-plot!(sol.t[myrange],sol.M3[myrange])
-plot!(sol.t[myrange],sol.H[myrange])
+sol = channel_states_euler(N_tot, dt, t_tot, p);
+myrange = 1:1:Int(round(t_tot/dt));
+fig1 = plot(sol.t[myrange],sol.V[myrange],label="V, N_tot = "*string(N_tot), xlabel = "t (ms)",ylabel = "V (mV)")
+fig2 = plot(sol.t[myrange],sol.N4[myrange]/N_tot,label="N₄")
+plot!(sol.t[myrange],sol.M3[myrange]/N_tot,label="M₃")
+plot!(sol.t[myrange],sol.H[myrange]/N_tot,label="H", xlabel = "t (ms)", ylabel = "Open channel / N_tot")
 
 plot(fig1,fig2,layout=(2,1))
-savefig("states.png")
+
+savefig("states_N_"*string(N_tot)*".png")
