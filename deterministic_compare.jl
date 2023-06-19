@@ -1,5 +1,4 @@
 using Plots, LoopVectorization, Distributions, LaTeXStrings
-
 αₙ(V) = (0.02 * (V - 25.0)) / (1.0 - exp((-1.0 * (V - 25.0)) / 9.0));
 αₘ(V) = (0.182 * (V + 35.0)) / (1.0 - exp((-1.0 * (V + 35.0)) / 9.0));
 αₕ(V) = 0.25 * exp((-1.0 * (V + 90.0)) / 12.0);
@@ -120,10 +119,20 @@ p[8] = 0
 sol3 = euler3(hodg_hux_det, u₀, p, tspan, dt)
 
 
-plot(sol3.t,sol3.u[1,:], xlabel = L"t (ms)", ylabel = L"V (mV)", dpi = 600, label = "Step current", ls = :solid)
+f1 = plot(sol3.t,sol3.u[1,:], xlabel = L"t (ms)", ylabel = L"V (mV)", dpi = 600, label = "Step current", ls = :solid, xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16,legendfontsize=14)
 
-plot!(sol2.t,sol2.u[1,:], xlabel = L"t (ms)", ylabel = L"V (mV)", dpi = 600, label = "Spike current", ls = :dash, background_color_legend = :white, foreground_color_legend = nothing)
+plot!(sol2.t,sol2.u[1,:], xlabel = L"t (ms)", ylabel = L"V (mV)", dpi = 600, label = "Spike current", ls = :dash, background_color_legend = :white, foreground_color_legend = nothing, linewidth = 2.7)
 
-plot!(sol1.t,sol1.u[1,:], xlabel = L"t (ms)", ylabel = L"V (mV)", dpi = 600, label = "No current", ls = :dashdot, location = :best)
+plot!(sol1.t,sol1.u[1,:], xlabel = L"t (ms)", ylabel = L"V (mV)", dpi = 600, label = "No current", ls = :dashdot, location = :best, size = (710,400), linewidth = 2, left_margin=2Plots.mm, bottom_margin=2Plots.mm)
 
 savefig("deterministic_currents.png")
+
+
+f2 = plot(sol3.t,sol3.u[1,:], xlabel = L"t (ms)", ylabel = L"V (mV)", dpi = 600, label = "", ls = :solid, xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16,legendfontsize=14, size = (700,400))
+
+
+myred = color(palette(:default)[2])
+f3 = plot(sol2.t,sol2.u[1,:], color = myred, palette = :default, xlabel = L"t (ms)", ylabel = L"V (mV)", dpi = 600, label = "Spike current", background_color_legend = :white, foreground_color_legend = nothing, size = (700,400))
+
+savefig(f2,"deterministic_step.png")
+savefig(f3,"deterministic_spike.png")
