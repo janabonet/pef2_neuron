@@ -294,42 +294,71 @@ p[8] = 0.0
 #--------------------------------------------det 2 
 
 
-N_tot = 11;
+N_tot = 100;
 dt = 0.5e-3;
 t_tot = 500;
 
+
 sol = channel_states_euler(N_tot, dt, t_tot, p);
 myrange = 1:100:Int(round(t_tot/dt));
-fig1 = plot(sol.t[myrange],sol.V[myrange],label=L"V_{Markov}, N_{tot} = "*latexstring(N_tot),
-xlabel = L"t (ms)",ylabel = L"V (mV)",dpi=600,background_color_legend = :white,
-foreground_color_legend = nothing,size = (700,400))
+fig1 = plot(sol.t[myrange],sol.V[myrange],
+xlabel = L"t (ms)",ylabel = L"V (mV)",dpi=600,size = (700,400))
 #plot determinisitc
 plot!(sol_det.t, sol_det[1,:], xlabel = L"t (ms)", ylabel = L"V (mV)",
 linewidth = 1,label=L"V_{det}", ls=:dash,dpi=600,size = (700,400),
-xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16,legendfontsize=15)
+xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16,legend=false)
 
 
 fig2 = plot(sol.t[myrange],sol.N4[myrange],label=L"N_{4,Markov}",dpi=600, ylimits=(0,11),size = (700,400))
-plot!(sol.t[myrange],sol.M3[myrange],label=L"M_{3,Markov}",dpi=600, ylimits=(0,11),size = (700,400))
-plot!(sol.t[myrange],sol.H[myrange],label=L"H_{Markov}",
+plot!(sol.t[myrange],sol.M3[myrange],dpi=600, ylimits=(0,11),size = (700,400))
+plot!(sol.t[myrange],sol.H[myrange], legend=false,
 xlabel =L"t (ms)", ylabel ="Number of open channels",dpi=600,size = (700,400),
-background_color_legend = :white, foreground_color_legend = nothing,legend=:topright,
-xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16,legendfontsize=15, ylimits=(0,11))
-#plot deterministic
-# plot!(sol_det.t,sol_det[2,:]*N_tot.^4,xlabel = L"t (ms)", ylabel = L"V (mV)", linewidth = 1,label=L"n",ls=:dash,dpi=600)
-# plot!(sol_det.t,sol_det[3,:]*N_tot.^3,xlabel = L"t (ms)", ylabel = L"V (mV)", linewidth = 1,label=L"m", ls=:dash,dpi=600)
-# plot!(sol_det.t,sol_det[4,:]*N_tot,xlabel = L"t (ms)", ylabel = L"V (mV)", linewidth = 1,label=L"h", ls=:dash,dpi=600)
+xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16, ylimits=(0,11))
 
 #plot gates deterministic
 plot!(sol_det.t,sol_det[6,:]*N_tot,xlabel = L"t (ms)", ylabel = L"Number\:of\:open\:channels",
-linewidth = 1,label=L"n_{det} \cdot N_{tot}",ls=:dash,dpi=600, ylimits=(0,11),size = (700,400))
+linewidth = 1,ls=:dash,dpi=600, ylimits=(0,11),size = (700,400))
 plot!(sol_det.t,sol_det[10,:]*N_tot,xlabel = L"t (ms)", ylabel = L"Number\:of\:open\:channels",
-linewidth = 1,label=L"m_{det} \cdot N_{tot}", ls=:dash,dpi=600, ylimits=(0,11),size = (700,400))
+linewidth = 1, ls=:dash,dpi=600, ylimits=(0,11),size = (700,400))
 plot!(sol_det.t,sol_det[11,:]*N_tot,xlabel = "t (ms)", ylabel = "Number of open channels",
-linewidth = 1,label=L"h_{det} \cdot N_{tot}", ls=:dash,dpi=600, ylimits=(0,11),size = (700,400),
-xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16,legendfontsize=15)
+linewidth = 1, ls=:dash,dpi=600, ylimits=(0,11),size = (700,400), legend=false,
+xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16,left_margin=2Plots.mm, bottom_margin=2Plots.mm)
 
 
-fig_tot=plot(fig1,fig2,layout=(2,1),dpi=600)
+
+
+
+
+
+
+
+
+
+
+
+
+# plot!(sol_det.t, sol_det[1,:], xlabel = L"t (ms)", ylabel = L"V (mV)",
+# linewidth = 1,label=L"V_{det}", ls=:dash,dpi=600,size = (700,400),
+# xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16,legendfontsize=15)
+
+
+# fig2 = plot(sol.t[myrange],sol.N4[myrange],label=L"N_{4,Markov}",dpi=600, ylimits=(0,11),size = (700,400))
+# plot!(sol.t[myrange],sol.M3[myrange],label=L"M_{3,Markov}",dpi=600, ylimits=(0,11),size = (700,400))
+# plot!(sol.t[myrange],sol.H[myrange],label=L"H_{Markov}",
+# xlabel =L"t (ms)", ylabel ="Number of open channels",dpi=600,size = (700,400),
+# background_color_legend = :white, foreground_color_legend = nothing,legend=:topright,
+# xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16,legendfontsize=15, ylimits=(0,11))
+
+# #plot gates deterministic
+# plot!(sol_det.t,sol_det[6,:]*N_tot,xlabel = L"t (ms)", ylabel = L"Number\:of\:open\:channels",
+# linewidth = 1,label=L"n_{det} \cdot N_{tot}",ls=:dash,dpi=600, ylimits=(0,11),size = (700,400))
+# plot!(sol_det.t,sol_det[10,:]*N_tot,xlabel = L"t (ms)", ylabel = L"Number\:of\:open\:channels",
+# linewidth = 1,label=L"m_{det} \cdot N_{tot}", ls=:dash,dpi=600, ylimits=(0,11),size = (700,400))
+# plot!(sol_det.t,sol_det[11,:]*N_tot,xlabel = "t (ms)", ylabel = "Number of open channels",
+# linewidth = 1,label=L"h_{det} \cdot N_{tot}", ls=:dash,dpi=600, ylimits=(0,11),size = (700,400),
+# xtickfontsize=12,ytickfontsize=12,xguidefontsize=16,yguidefontsize=16,legendfontsize=15,left_margin=2Plots.mm, bottom_margin=2Plots.mm)
+
+
+# fig_tot=plot(fig1,fig2,layout=(2,1),dpi=600)
 savefig(fig1,"v_n"*string(N_tot))
 savefig(fig2,"vars_n"*string(N_tot))
